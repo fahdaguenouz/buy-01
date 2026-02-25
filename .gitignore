@@ -84,4 +84,6 @@ buildNumber.properties
 # ==========================================
 # Assuming you create a local folder to mock cloud storage for media
 uploads/
-media-storage/
+logs/
+.log
+
