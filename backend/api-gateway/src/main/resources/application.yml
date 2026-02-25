@@ -1,1 +1,56 @@
-spring.application.name=api-gateway
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      # ==========================================
+      # Global CORS Configuration for Angular
+      # ==========================================
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200" # Allow Angular to connect
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
+      # ==========================================
+      # Microservice Routing Rules
+      # ==========================================
+      routes:
+        # Route 1: User Service (Handles Auth and Profile)
+        - id: user-service
+          uri: lb://user-service # 'lb://' means Load Balancer via Eureka
+          predicates:
+            - Path=/auth/**, /me/**
+
+        # Route 2: Product Service (Handles Products)
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/products/**
+
+        # Route 3: Media Service (Handles Image Uploads)
+        - id: media-service
+          uri: lb://media-service
+          predicates:
+            - Path=/media/**
+
+# ==========================================
+# Eureka Client Configuration
+# ==========================================
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
