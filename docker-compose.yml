@@ -51,24 +51,29 @@ services:
     networks:
       - buy01-network
 
+ # ==========================================
+  # Mongo Express (Optional UI for your DB)
   # ==========================================
+# ==========================================
   # Mongo Express (Optional UI for your DB)
   # ==========================================
   mongo-express:
-    image: mongo-express
+    image: mongo-express:1.0.2
     container_name: buy01-mongo-express
-    restart: always
+    restart: unless-stopped
     ports:
-      - "8085:8081" # Mapped to 8085 so it doesn't conflict with your User Service
+      - "8085:8081" 
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
-      ME_CONFIG_MONGODB_ADMINPASSWORD: adminpassword
+      # 1. Credentials for the Browser UI login pop-up
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: adminpassword
+      
+      # 2. The single connection string required by v1.0.2+
       ME_CONFIG_MONGODB_URL: mongodb://admin:adminpassword@mongodb:27017/
     depends_on:
       - mongodb
     networks:
       - buy01-network
-
 # Define persistent storage and networking
 volumes:
   mongo-data:
