@@ -51,12 +51,9 @@ services:
     networks:
       - buy01-network
 
- # ==========================================
-  # Mongo Express (Optional UI for your DB)
-  # ==========================================
 # ==========================================
   # Mongo Express (Optional UI for your DB)
-  # ==========================================
+# ==========================================
   mongo-express:
     image: mongo-express:1.0.2
     container_name: buy01-mongo-express
