@@ -23,7 +23,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService; 
+    private final JwtService jwtService;
 
     public AuthResponse register(RegisterRequest request) {
         String email = request.email().trim().toLowerCase();
@@ -31,6 +31,7 @@ public class AuthService {
 
         if (userRepository.existsByEmail(email))
             throw new IllegalArgumentException("Email already in use");
+
         if (userRepository.existsByUsername(username))
             throw new IllegalArgumentException("Username already in use");
 
@@ -45,23 +46,15 @@ public class AuthService {
 
         userRepository.save(user);
 
-        // Add custom claims (UUID and Role) to the JWT
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("userId", user.getId());
-        extraClaims.put("role", user.getRole().name());
-
-        // Explicitly declare as String to fix compiler error
-       String jwtToken = jwtService.generateToken(user);
-
-        return buildAuthResponse(user, jwtToken);
+        // Return WITHOUT token
+        return buildAuthResponse(user, null);
     }
 
     public AuthResponse login(LoginRequest request) {
         String identifier = request.identifier().trim().toLowerCase();
 
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(identifier, request.password())
-        );
+                new UsernamePasswordAuthenticationToken(identifier, request.password()));
 
         var user = userRepository.findByEmailOrUsername(identifier, identifier)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid credentials."));
