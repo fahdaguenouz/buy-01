@@ -9,12 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -87,6 +89,17 @@ public class GlobalExceptionHandler {
                 body(HttpStatus.UNAUTHORIZED, "Invalid or expired authentication token. Please log in again.", req));
     }
 
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<?> handleNotFound(
+            NoHandlerFoundException ex,
+            HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(body(
+                        HttpStatus.NOT_FOUND,
+                        "Endpoint not found.",
+                        req));
+    }
+
     // ✅ Handled: Bad HTTP requests (missing params, unreadable JSON)
     @ExceptionHandler({
             MethodArgumentTypeMismatchException.class,
@@ -111,6 +124,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(body(HttpStatus.BAD_REQUEST, message, req));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<?> handleMethodNotAllowed(
+            HttpRequestMethodNotSupportedException ex,
+            HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(body(
+                        HttpStatus.METHOD_NOT_ALLOWED,
+                        "HTTP method not allowed for this endpoint.",
+                        req));
     }
 
     // ✅ Handled: Manual status exceptions
