@@ -5,21 +5,22 @@ spring:
   application:
     name: user-service
 
-jwt:
-  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-  expiration: 86400000 # 24 hours in milliseconds
-
-  # MongoDB Connection (matching your docker-compose.yml)
+  # MongoDB Connection MUST be under 'spring:'
   data:
     mongodb:
       uri: mongodb://admin:adminpassword@localhost:27017/user_db?authSource=admin
 
-  # Kafka Connection
+  # Kafka Connection MUST be under 'spring:'
   kafka:
     bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+# Your custom JWT config goes at the root level
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  expiration: 86400000 # 24 hours in milliseconds
 
 # Eureka Client Configuration
 eureka:

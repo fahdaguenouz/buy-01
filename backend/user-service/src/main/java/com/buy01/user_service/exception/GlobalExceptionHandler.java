@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest req) {
         log.warn("Illegal argument at {}: {}", req.getRequestURI(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            body(HttpStatus.BAD_REQUEST, ex.getMessage(), req));
+                body(HttpStatus.BAD_REQUEST, ex.getMessage(), req));
     }
 
     // ✅ Handled: Wrong password or missing user during login
@@ -48,20 +48,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex, HttpServletRequest req) {
         log.warn("Failed login attempt at {}", req.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-            body(HttpStatus.UNAUTHORIZED, "Invalid email, username, or password.", req));
+                body(HttpStatus.UNAUTHORIZED, "Invalid email, username, or password.", req));
     }
 
-    // ✅ Handled: Validation errors from DTOs (e.g., password too short, invalid email)
+    // ✅ Handled: Validation errors from DTOs (e.g., password too short, invalid
+    // email)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
         String msg = ex.getBindingResult().getFieldErrors().stream()
-            .findFirst()
-            .map(e -> e.getField() + ": " + e.getDefaultMessage())
-            .orElse("Validation failed");
+                .findFirst()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .orElse("Validation failed");
 
         log.warn("Validation failed at {}: {}", req.getRequestURI(), msg);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            body(HttpStatus.BAD_REQUEST, msg, req));
+                body(HttpStatus.BAD_REQUEST, msg, req));
     }
 
     // ✅ Handled: Database constraint violations
@@ -69,33 +70,47 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest req) {
         log.warn("Data integrity violation at {}: {}", req.getRequestURI(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
-            body(HttpStatus.CONFLICT, "A database conflict occurred. This record might already exist.", req));
+                body(HttpStatus.CONFLICT, "A database conflict occurred. This record might already exist.", req));
     }
 
     // ✅ Handled: Role-based access restrictions (@PreAuthorize)
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDenied(AccessDeniedException ex, HttpServletRequest req) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-            body(HttpStatus.FORBIDDEN, "You do not have permission to access this resource.", req));
+                body(HttpStatus.FORBIDDEN, "You do not have permission to access this resource.", req));
     }
 
     // ✅ Handled: Invalid or expired tokens
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<?> handleJwt(JwtException ex, HttpServletRequest req) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-            body(HttpStatus.UNAUTHORIZED, "Invalid or expired authentication token. Please log in again.", req));
+                body(HttpStatus.UNAUTHORIZED, "Invalid or expired authentication token. Please log in again.", req));
     }
 
     // ✅ Handled: Bad HTTP requests (missing params, unreadable JSON)
     @ExceptionHandler({
-        MethodArgumentTypeMismatchException.class,
-        HttpMessageNotReadableException.class,
-        MissingServletRequestParameterException.class
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class
     })
     public ResponseEntity<?> handleBadRequest(Exception ex, HttpServletRequest req) {
         log.warn("Malformed request at {}: {}", req.getRequestURI(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            body(HttpStatus.BAD_REQUEST, "Malformed request syntax or invalid parameters.", req));
+                body(HttpStatus.BAD_REQUEST, "Malformed request syntax or invalid parameters.", req));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleUnreadable(HttpMessageNotReadableException ex, HttpServletRequest req) {
+
+        String message = "Malformed request.";
+
+        if (ex.getMessage().contains("Role")) {
+            message = "Invalid role value. Allowed values: CLIENT, ADMIN, SELLER.";
+        }
+
+        log.warn("Malformed JSON at {}: {}", req.getRequestURI(), ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(body(HttpStatus.BAD_REQUEST, message, req));
     }
 
     // ✅ Handled: Manual status exceptions
@@ -103,7 +118,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleResponseStatus(ResponseStatusException ex, HttpServletRequest req) {
         HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
         return ResponseEntity.status(status).body(
-            body(status, ex.getReason() != null ? ex.getReason() : status.getReasonPhrase(), req));
+                body(status, ex.getReason() != null ? ex.getReason() : status.getReasonPhrase(), req));
     }
 
     // ✅ Fallback: Catch all unhandled exceptions to prevent naked 500 pages
@@ -111,6 +126,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleGeneric(Exception ex, HttpServletRequest req) {
         log.error("Unhandled error at {}: {}", req.getRequestURI(), ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-            body(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred. Our team has been notified.", req));
+                body(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred, Server error.", req));
     }
 }

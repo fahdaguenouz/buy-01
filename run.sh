@@ -35,7 +35,7 @@ SERVICES=("api-gateway" "user-service" "product-service" "media-service")
 for SERVICE in "${SERVICES[@]}"; do
     echo "⚙️ Starting $SERVICE..."
     cd "backend/$SERVICE"
-    ./mvnw spring-boot:run > "../../logs/$SERVICE.log" 2>&1 &
+   ./mvnw clean spring-boot:run > "../../logs/$SERVICE.log" 2>&1 &
     cd ../..
 done
 
