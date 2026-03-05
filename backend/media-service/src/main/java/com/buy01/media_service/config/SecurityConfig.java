@@ -39,7 +39,7 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/media/upload").hasRole("SELLER") // Only Sellers can upload
-                .requestMatchers("/uploads/**").permitAll() // Anyone can view images
+                .requestMatchers("/api/media/images/**").permitAll() // Anyone can view images
                 .anyRequest().authenticated()
             )
             // 4. ADD YOUR FILTER BEFORE THE DEFAULT SPRING SECURITY FILTER

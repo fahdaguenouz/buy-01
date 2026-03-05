@@ -4,11 +4,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+
+import javax.imageio.ImageIO;
 
 @Service
 public class LocalFileStorageService {
@@ -24,19 +27,35 @@ public class LocalFileStorageService {
         }
     }
 
-    public String storeFile(MultipartFile file) {
-        // Normalize file name and generate a unique ID
+ public String storeFile(MultipartFile file) {
+        // 1. Basic Content-Type Check
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("Invalid file format. Only images are allowed.");
+        }
+
+        // 2. Deep Sniffing (Verify it's actually an image, not a renamed .exe)
+        try (InputStream input = file.getInputStream()) {
+            if (ImageIO.read(input) == null) {
+                throw new IllegalArgumentException("The file is corrupt or not a valid image.");
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to read the image file.", e);
+        }
+
+        // 3. Normalize and Save (Your existing logic)
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
-        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        String fileExtension = "";
+        if (originalFileName.contains(".")) {
+            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        }
+        
         String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
 
         try {
-            // Check if the file's name contains invalid characters
             if (uniqueFileName.contains("..")) {
                 throw new RuntimeException("Sorry! Filename contains invalid path sequence " + uniqueFileName);
             }
-
-            // Copy file to the target location (Replacing existing file with the same name)
             Path targetLocation = this.fileStorageLocation.resolve(uniqueFileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
@@ -44,5 +63,9 @@ public class LocalFileStorageService {
         } catch (IOException ex) {
             throw new RuntimeException("Could not store file " + uniqueFileName + ". Please try again!", ex);
         }
+    }
+    // Add this helper method so our GET controller can load the file later
+    public Path loadFileAsPath(String fileName) {
+        return this.fileStorageLocation.resolve(fileName).normalize();
     }
 }

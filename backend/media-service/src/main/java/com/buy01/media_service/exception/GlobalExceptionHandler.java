@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -69,6 +70,13 @@ public class GlobalExceptionHandler {
         log.warn("Multipart request error at {}: {}", req.getRequestURI(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 body(HttpStatus.BAD_REQUEST, "The request must be a file upload. Please ensure your client is sending a 'multipart/form-data' request.", req));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<?> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest req) {
+        log.warn("Method not supported at {}: {}", req.getRequestURI(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(
+                body(HttpStatus.METHOD_NOT_ALLOWED, "HTTP method not allowed for this endpoint. " + ex.getMessage(), req));
     }
 
     // ✅ Fallback: Catch-all for any other unhandled exceptions
