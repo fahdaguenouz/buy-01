@@ -1,6 +1,6 @@
 #!/bin/bash
 clear
-echo "🚀 Quick Starting Buy 01 Microservices Ecosystem..."
+echo "🚀 Starting Buy 01 Microservices Ecosystem..."
 
 # Clean old logs
 echo "🧹 Clearing old log files..."
@@ -18,33 +18,49 @@ cleanup() {
 
 trap cleanup SIGINT
 
+# All services
+ALL_SERVICES=("discovery-server" "api-gateway" "user-service" "product-service" "media-service")
+
+echo "🔨 Cleaning and rebuilding all services..."
+
+for SERVICE in "${ALL_SERVICES[@]}"; do
+    echo "🔧 Building $SERVICE..."
+    cd "backend/$SERVICE" || exit
+    ./mvnw clean package -DskipTests > "../../logs/${SERVICE}-build.log" 2>&1
+    if [ $? -ne 0 ]; then
+        echo "❌ Build failed for $SERVICE. Check logs/${SERVICE}-build.log"
+        exit 1
+    fi
+    cd ../..
+done
+
+echo "✅ All services built successfully."
+
 # Start Eureka first
 echo "📡 Starting discovery-server..."
-cd backend/discovery-server || exit
+cd backend/discovery-server
 ./mvnw spring-boot:run > ../../logs/discovery-server.log 2>&1 &
 cd ../..
 
-echo "⏳ Waiting 15 seconds for Eureka to start..."
+echo "⏳ Waiting 15 seconds for Eureka..."
 sleep 15
 
 # Start other services
 SERVICES=("api-gateway" "user-service" "product-service" "media-service")
 
-echo "⚡ Starting remaining microservices (with incremental build)..."
 for SERVICE in "${SERVICES[@]}"; do
     echo "⚙️ Starting $SERVICE..."
-    cd "backend/$SERVICE" || exit
+    cd "backend/$SERVICE"
     ./mvnw spring-boot:run > "../../logs/$SERVICE.log" 2>&1 &
     cd ../..
 done
 
 echo ""
-echo "✅ All services are spinning up in the background."
+echo "✅ All services started in background."
 echo "📊 Eureka Dashboard: http://localhost:8761"
-echo "📖 Central Swagger UI: http://localhost:8080/swagger-ui.html"
 echo ""
-echo "📄 You can monitor logs live in a separate terminal. Example:"
-echo "   tail -f logs/api-gateway.log"
+echo "📄 Logs location:"
+echo "   logs/"
 echo ""
 echo "🛑 Press Ctrl+C to stop everything."
 
