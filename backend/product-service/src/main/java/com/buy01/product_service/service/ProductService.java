@@ -5,8 +5,11 @@ import com.buy01.product_service.dto.ProductResponse;
 import com.buy01.product_service.models.Product;
 import com.buy01.product_service.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,6 +17,9 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    // Inject the base URL for the Media Service from application.yml
+    @Value("${media-service.base-url:http://localhost:8083/api/media/images/}")
+    private String mediaServiceBaseUrl;
 
     public ProductResponse createProduct(ProductRequest request, String sellerId) {
         Product product = Product.builder()
@@ -52,6 +58,15 @@ public class ProductService {
 
     // Helper method to convert Entity to DTO
     private ProductResponse mapToResponse(Product product) {
+
+        // Transform the raw media IDs (e.g., "img1.jpg") into full URLs
+        List<String> mediaUrls = new ArrayList<>();
+        if (product.getMediaIds() != null) {
+            for (String mediaId : product.getMediaIds()) {
+                mediaUrls.add(mediaServiceBaseUrl + mediaId);
+            }
+        }
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -60,7 +75,8 @@ public class ProductService {
                 .stockQuantity(product.getStockQuantity())
                 .category(product.getCategory())
                 .sellerId(product.getSellerId())
-                .mediaIds(product.getMediaIds())
+                // Pass the transformed URLs back to the client instead of raw IDs!
+                .mediaIds(mediaUrls)
                 .createdAt(product.getCreatedAt())
                 .build();
     }

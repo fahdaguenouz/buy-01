@@ -14,7 +14,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,21 +26,28 @@ public class MediaController {
     @Autowired
     private LocalFileStorageService fileStorageService;
 
+   // CHANGED: Now accepts a List of MultipartFiles
     @PostMapping("/upload")
-    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
-        String fileName = fileStorageService.storeFile(file);
+    public ResponseEntity<List<Map<String, String>>> uploadFiles(@RequestParam("file") List<MultipartFile> files) {
+        
+        List<Map<String, String>> responses = new ArrayList<>();
 
-        // Generate the URL to access the file
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/media/images/")
-                .path(fileName)
-                .toUriString();
+        for (MultipartFile file : files) {
+            String fileName = fileStorageService.storeFile(file);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("fileName", fileName);
-        response.put("fileUrl", fileDownloadUri);
+            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/api/media/images/")
+                    .path(fileName)
+                    .toUriString();
 
-        return ResponseEntity.ok(response);
+            Map<String, String> response = new HashMap<>();
+            response.put("fileName", fileName);
+            response.put("fileUrl", fileDownloadUri);
+            
+            responses.add(response);
+        }
+
+        return ResponseEntity.ok(responses);
     }
     @GetMapping("/images/{fileName:.+}")
     public ResponseEntity<Resource> serveImage(@PathVariable String fileName) {
