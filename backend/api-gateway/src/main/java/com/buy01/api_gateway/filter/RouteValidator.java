@@ -11,10 +11,13 @@ import java.util.function.Predicate;
 public class RouteValidator {
 
     // Define public endpoints that bypass JWT validation
-    public static final List<String> openApiEndpoints = List.of(
+   public static final List<String> openApiEndpoints = List.of(
             "/auth/register",
             "/auth/login",
-            "/eureka"
+            "/eureka",
+            "/v3/api-docs",      // <-- ADD THIS
+            "/swagger-ui",       // <-- ADD THIS
+            "/swagger-ui.html"   // <-- ADD THIS
     );
 
     public Predicate<ServerHttpRequest> isSecured =

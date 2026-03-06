@@ -14,37 +14,15 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
       routes:
-        # --- 1. ACTUAL API ROUTES ---
-        - id: user-service
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/auth/**,/users/**
-          filters:
-            - AuthenticationFilter
-
-        - id: product-service
-          uri: lb://PRODUCT-SERVICE
-          predicates:
-            - Path=/products/**
-          filters:
-            - AuthenticationFilter
-
-        - id: media-service
-          uri: lb://MEDIA-SERVICE
-          predicates:
-            - Path=/api/media/**
-          filters:
-            - AuthenticationFilter
-
-        # --- 2. SWAGGER UI VISUAL ROUTE ---
-        # Forwards browser requests for the UI to the User Service
+        # ==========================================
+        # 1. SPECIFIC ROUTES (SWAGGER DOCS) 
+        # (These must come first to avoid the wildcards below)
+        # ==========================================
         - id: swagger-ui
           uri: lb://USER-SERVICE
           predicates:
             - Path=/swagger-ui.html, /swagger-ui/**, /v3/api-docs/swagger-config
 
-        # --- 3. SWAGGER JSON DOC ROUTES ---
-        # Fetches the actual API documentation data from each service
         - id: user-service-docs
           uri: lb://USER-SERVICE
           predicates:
@@ -65,6 +43,30 @@ spring:
             - Path=/api/media/v3/api-docs/**
           filters:
             - StripPrefix=2
+
+        # ==========================================
+        # 2. BROAD WILDCARD ROUTES (ACTUAL API)
+        # ==========================================
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/auth/**,/users/**
+          filters:
+            - AuthenticationFilter
+
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/products/**
+          filters:
+            - AuthenticationFilter
+
+        - id: media-service
+          uri: lb://MEDIA-SERVICE
+          predicates:
+            - Path=/api/media/**
+          filters:
+            - AuthenticationFilter
 
 eureka:
   client:
