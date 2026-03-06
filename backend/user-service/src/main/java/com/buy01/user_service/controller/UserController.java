@@ -6,6 +6,8 @@ import com.buy01.user_service.models.User;
 import com.buy01.user_service.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +18,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserRepository userRepository;
-
+    @Value("${media-service.base-url:http://localhost:8083/api/media/images/}")
+    private String mediaServiceBaseUrl;
     // GET /users/me - Fetch my own profile
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> getCurrentProfile(@AuthenticationPrincipal User currentUser) {
@@ -44,7 +47,19 @@ public class UserController {
     }
 
     // Helper method to convert the User entity to a safe DTO
-    private UserProfileResponse mapToResponse(User user) {
+   private UserProfileResponse mapToResponse(User user) {
+        
+        // Construct the full URL if the user has an avatar
+        String fullAvatarUrl = null;
+        if (user.getAvatarMediaId() != null && !user.getAvatarMediaId().isEmpty()) {
+            // Check if it's already a full URL (just in case the frontend sent the whole URL by mistake)
+            if (user.getAvatarMediaId().startsWith("http")) {
+                fullAvatarUrl = user.getAvatarMediaId();
+            } else {
+                fullAvatarUrl = mediaServiceBaseUrl + user.getAvatarMediaId();
+            }
+        }
+
         return UserProfileResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -52,7 +67,8 @@ public class UserController {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .role(user.getRole())
-                .avatarMediaId(user.getAvatarMediaId())
+                // Pass the full URL to the frontend!
+                .avatarMediaId(fullAvatarUrl) 
                 .build();
     }
 }
