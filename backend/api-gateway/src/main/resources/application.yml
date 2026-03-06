@@ -4,55 +4,68 @@ server:
 spring:
   application:
     name: api-gateway
-
   cloud:
     gateway:
-      server:
-        webflux: # <-- THIS IS THE NEW REQUIRED LEVEL
-          # ==========================================
-          # Global CORS Configuration for Angular
-          # ==========================================
-          globalcors:
-            cors-configurations:
-              '[/**]':
-                allowedOrigins: "http://localhost:4200" # Allow Angular to connect
-                allowedMethods:
-                  - GET
-                  - POST
-                  - PUT
-                  - DELETE
-                  - OPTIONS
-                allowedHeaders: "*"
-                allowCredentials: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+      routes:
+        # --- 1. ACTUAL API ROUTES ---
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/auth/**,/users/**
+          filters:
+            - AuthenticationFilter
 
-          # ==========================================
-          # Microservice Routing Rules
-          # ==========================================
-          routes:
-            - id: user-service
-              uri: lb://user-service
-              predicates:
-                - Path=/auth/**, /users/**
-              filters:
-                - AuthenticationFilter 
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/products/**
+          filters:
+            - AuthenticationFilter
 
-            - id: product-service
-              uri: lb://product-service
-              predicates:
-                - Path=/products/**
-              filters:
-                - AuthenticationFilter 
-                
-            - id: media-service
-              uri: lb://media-service
-              predicates:
-                - Path=/api/media/**
-              filters:
-                - AuthenticationFilter 
+        - id: media-service
+          uri: lb://MEDIA-SERVICE
+          predicates:
+            - Path=/api/media/**
+          filters:
+            - AuthenticationFilter
 
-# ==========================================
-# Eureka Client Configuration
-# ==========================================
+        # --- 2. SWAGGER UI VISUAL ROUTE ---
+        # Forwards browser requests for the UI to the User Service
+        - id: swagger-ui
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/swagger-ui.html, /swagger-ui/**, /v3/api-docs/swagger-config
+
+        # --- 3. SWAGGER JSON DOC ROUTES ---
+        # Fetches the actual API documentation data from each service
+        - id: user-service-docs
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: product-service-docs
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/products/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: media-service-docs
+          uri: lb://MEDIA-SERVICE
+          predicates:
+            - Path=/api/media/v3/api-docs/**
+          filters:
+            - StripPrefix=2
+
 eureka:
   client:
     service-url:
@@ -60,8 +73,5 @@ eureka:
   instance:
     prefer-ip-address: true
 
-# ==========================================
-# JWT Configuration for the Filter
-# ==========================================
 jwt:
   secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970

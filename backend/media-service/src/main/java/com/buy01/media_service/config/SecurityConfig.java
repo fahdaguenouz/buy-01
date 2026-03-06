@@ -29,22 +29,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for REST APIs
-            .exceptionHandling(exception -> exception
-                .authenticationEntryPoint(unauthorizedHandler) // Inject our custom 401 handler here!
-            )
-            // 3. MAKE SESSION STATELESS (Crucial for JWT microservices)
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) 
-            )
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/media/upload").hasRole("SELLER") // Only Sellers can upload
-                .requestMatchers("/api/media/images/**").permitAll() // Anyone can view images
-                .anyRequest().authenticated()
-            )
-            // 4. ADD YOUR FILTER BEFORE THE DEFAULT SPRING SECURITY FILTER
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for REST APIs
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(unauthorizedHandler) // Inject our custom 401 handler here!
+                )
+                // 3. MAKE SESSION STATELESS (Crucial for JWT microservices)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/media/upload").hasRole("SELLER") // Only Sellers can upload
+                        // In SecurityConfig.java for User, Product, and Media
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/media/images/**").permitAll() // Anyone can view images
+                        .anyRequest().authenticated())
+                // 4. ADD YOUR FILTER BEFORE THE DEFAULT SPRING SECURITY FILTER
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }
