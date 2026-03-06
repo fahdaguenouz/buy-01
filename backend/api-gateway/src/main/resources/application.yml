@@ -7,43 +7,48 @@ spring:
 
   cloud:
     gateway:
-      # ==========================================
-      # Global CORS Configuration for Angular
-      # ==========================================
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins: "http://localhost:4200" # Allow Angular to connect
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
+      server:
+        webflux: # <-- THIS IS THE NEW REQUIRED LEVEL
+          # ==========================================
+          # Global CORS Configuration for Angular
+          # ==========================================
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins: "http://localhost:4200" # Allow Angular to connect
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
 
-      # ==========================================
-      # Microservice Routing Rules
-      # ==========================================
-      routes:
-        # Route 1: User Service (Handles Auth and Profile)
-        - id: user-service
-          uri: lb://user-service # 'lb://' means Load Balancer via Eureka
-          predicates:
-            - Path=/auth/**, /me/**
+          # ==========================================
+          # Microservice Routing Rules
+          # ==========================================
+          routes:
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/auth/**, /users/**
+              filters:
+                - AuthenticationFilter 
 
-        # Route 2: Product Service (Handles Products)
-        - id: product-service
-          uri: lb://product-service
-          predicates:
-            - Path=/products/**
-
-        # Route 3: Media Service (Handles Image Uploads)
-        - id: media-service
-          uri: lb://media-service
-          predicates:
-            - Path=/media/**
+            - id: product-service
+              uri: lb://product-service
+              predicates:
+                - Path=/products/**
+              filters:
+                - AuthenticationFilter 
+                
+            - id: media-service
+              uri: lb://media-service
+              predicates:
+                - Path=/api/media/**
+              filters:
+                - AuthenticationFilter 
 
 # ==========================================
 # Eureka Client Configuration
@@ -54,3 +59,9 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
   instance:
     prefer-ip-address: true
+
+# ==========================================
+# JWT Configuration for the Filter
+# ==========================================
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
