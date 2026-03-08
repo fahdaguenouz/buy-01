@@ -1,8 +1,11 @@
 package com.buy01.media_service.service;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import lombok.extern.slf4j.Slf4j; // <-- Add this
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -10,10 +13,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.io.File; // <-- Add this
 
 import javax.imageio.ImageIO;
 
 @Service
+@Slf4j // <-- Add this for logging
 public class LocalFileStorageService {
 
     private final Path fileStorageLocation;
@@ -27,14 +32,14 @@ public class LocalFileStorageService {
         }
     }
 
- public String storeFile(MultipartFile file) {
+    public String storeFile(MultipartFile file) {
         // 1. Basic Content-Type Check
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new IllegalArgumentException("Invalid file format. Only images are allowed.");
         }
 
-        // 2. Deep Sniffing (Verify it's actually an image, not a renamed .exe)
+        // 2. Deep Sniffing (Verify it's actually an image)
         try (InputStream input = file.getInputStream()) {
             if (ImageIO.read(input) == null) {
                 throw new IllegalArgumentException("The file is corrupt or not a valid image.");
@@ -43,7 +48,7 @@ public class LocalFileStorageService {
             throw new IllegalArgumentException("Failed to read the image file.", e);
         }
 
-        // 3. Normalize and Save (Your existing logic)
+        // 3. Normalize and Save
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
         String fileExtension = "";
         if (originalFileName.contains(".")) {
@@ -64,8 +69,28 @@ public class LocalFileStorageService {
             throw new RuntimeException("Could not store file " + uniqueFileName + ". Please try again!", ex);
         }
     }
-    // Add this helper method so our GET controller can load the file later
+
     public Path loadFileAsPath(String fileName) {
         return this.fileStorageLocation.resolve(fileName).normalize();
+    }
+
+    // ==========================================
+    // NEW METHOD: Delete File
+    // ==========================================
+    public boolean deleteFile(String fileName) {
+        try {
+            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            File file = filePath.toFile();
+            
+            if (file.exists()) {
+                return file.delete();
+            } else {
+                log.warn("⚠️ File not found, could not delete: {}", filePath);
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("❌ Error occurred while trying to delete file: {}", fileName, e);
+            return false;
+        }
     }
 }
