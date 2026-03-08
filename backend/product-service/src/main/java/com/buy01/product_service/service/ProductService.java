@@ -2,9 +2,11 @@ package com.buy01.product_service.service;
 
 import com.buy01.product_service.dto.ProductRequest;
 import com.buy01.product_service.dto.ProductResponse;
+import com.buy01.product_service.event.ProductEventProducer; // <--- ADDED IMPORT
 import com.buy01.product_service.models.Product;
 import com.buy01.product_service.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // <--- ADDED IMPORT
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,10 +16,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductService {
 
     private final ProductRepository productRepository;
-    // Inject the base URL for the Media Service from application.yml
+    private final ProductEventProducer productEventProducer; // <--- INJECTED KAFKA PRODUCER
+
     @Value("${media-service.base-url:http://localhost:8083/api/media/images/}")
     private String mediaServiceBaseUrl;
 
@@ -28,7 +32,7 @@ public class ProductService {
                 .price(request.price())
                 .stockQuantity(request.stockQuantity())
                 .category(request.category())
-                .sellerId(sellerId) // Directly attach the user ID from the JWT
+                .sellerId(sellerId) 
                 .mediaIds(request.mediaIds())
                 .build();
 
@@ -56,10 +60,39 @@ public class ProductService {
                 .toList();
     }
 
-    // Helper method to convert Entity to DTO
-    private ProductResponse mapToResponse(Product product) {
+    // ==========================================
+    // NEW DELETION LOGIC WITH KAFKA AND SECURITY
+    // ==========================================
+    public void deleteProduct(String productId, String sellerId) {
+        // 1. Find the product
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
 
-        // Transform the raw media IDs (e.g., "img1.jpg") into full URLs
+        // 2. Security Check: Ensure the user requesting deletion is the actual owner
+        if (!product.getSellerId().equals(sellerId)) {
+            log.warn("Security Alert: User {} attempted to delete Product {} belonging to {}", 
+                    sellerId, productId, product.getSellerId());
+            throw new SecurityException("You do not have permission to delete this product.");
+        }
+
+        // 3. Save the media IDs before we delete the product
+        List<String> mediaIdsToDelete = product.getMediaIds();
+
+        // 4. Delete the product from the Product database
+        productRepository.delete(product);
+        log.info("Product {} successfully deleted from database.", productId);
+
+        // 5. Fire Kafka events for the Media Service to clean up the hard drive
+        if (mediaIdsToDelete != null && !mediaIdsToDelete.isEmpty()) {
+            for (String mediaId : mediaIdsToDelete) {
+                // Because mediaId might be saved as a full URL or just an ID, ensure we only send the ID
+                // (Optional: if your DB saves full URLs, you might need to extract just the filename here)
+                productEventProducer.publishProductDeletedEvent(mediaId);
+            }
+        }
+    }
+
+    private ProductResponse mapToResponse(Product product) {
         List<String> mediaUrls = new ArrayList<>();
         if (product.getMediaIds() != null) {
             for (String mediaId : product.getMediaIds()) {
@@ -75,7 +108,6 @@ public class ProductService {
                 .stockQuantity(product.getStockQuantity())
                 .category(product.getCategory())
                 .sellerId(product.getSellerId())
-                // Pass the transformed URLs back to the client instead of raw IDs!
                 .mediaIds(mediaUrls)
                 .createdAt(product.getCreatedAt())
                 .build();

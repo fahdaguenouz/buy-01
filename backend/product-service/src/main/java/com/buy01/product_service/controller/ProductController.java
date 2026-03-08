@@ -28,7 +28,7 @@ public class ProductController {
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<ProductResponse> createProduct(
             @Valid @RequestBody ProductRequest request,
-            @AuthenticationPrincipal String sellerId) { // Grabs UUID from the JWT
+            @AuthenticationPrincipal String sellerId) { 
         
         ProductResponse response = productService.createProduct(request, sellerId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -40,6 +40,18 @@ public class ProductController {
             @AuthenticationPrincipal String sellerId) {
         
         return ResponseEntity.ok(productService.getProductsBySeller(sellerId));
+    }
+
+    // NEW DELETE ENDPOINT
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<Void> deleteProduct(
+            @PathVariable String id,
+            @AuthenticationPrincipal String sellerId) { // Gets the UUID from the JWT
+        
+        productService.deleteProduct(id, sellerId);
+        // Return 204 No Content indicating success but no response body
+        return ResponseEntity.noContent().build(); 
     }
 
     // ==========================================
