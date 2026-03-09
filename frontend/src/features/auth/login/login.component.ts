@@ -39,7 +39,7 @@ export class LoginComponent implements OnInit {
           // If your backend returns { token: '...', id: 1, email: '...' }
           // without a nested 'user' object, use 'data' directly:
           this.tokenStorage.saveUser(data.user || data);
-
+            this.authService.setLoggedInUser(data.user);
           // Navigate to /products explicitly to ensure the guard catches it
           this.router.navigate(['/products']);
         },

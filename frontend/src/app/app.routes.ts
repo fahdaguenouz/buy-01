@@ -3,6 +3,7 @@ import { LoginComponent } from '../features/auth/login/login.component';
 import { NoAuthGuard } from '../core/guards/no-auth.guard';
 import { RegisterComponent } from '../features/auth/register/register.component';
 import { AuthGuard } from '../core/guards/auth.guard';
+import { ProductListComponent } from '../features/products/product-list/product-list.component';
 
 
 export const routes: Routes = [
