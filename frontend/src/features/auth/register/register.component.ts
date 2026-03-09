@@ -2,44 +2,41 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-import { TokenStorageService } from '../../../services/token-storage.service';
+import { UserRole } from '../../../models/user.model';
 
 @Component({
-    standalone: false,
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+  styleUrls: ['./register.component.scss'],
+  standalone: false
 })
 export class RegisterComponent implements OnInit {
-  loginForm!: FormGroup;
+  registerForm!: FormGroup;
   errorMessage = '';
-  hidePassword = true;
+  roles = [UserRole.CLIENT, UserRole.SELLER]; // Loaded from our model
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private tokenStorage: TokenStorageService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loginForm = this.fb.group({
+    this.registerForm = this.fb.group({
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      role: [UserRole.CLIENT, Validators.required] // Default role
     });
   }
 
-  onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.authService.login(this.loginForm.value).subscribe({
-        next: (data) => {
-          this.tokenStorage.saveToken(data.token);
-          this.tokenStorage.saveUser(data.user);
-          this.router.navigate(['/']); 
-        },
-        error: (err) => {
-          this.errorMessage = err.error.message || 'Check your credentials.';
-        }
+  onRegister() {
+    if (this.registerForm.valid) {
+      this.authService.register(this.registerForm.value).subscribe({
+        next: () => this.router.navigate(['/login']),
+        error: (err) => this.errorMessage = err.error.message || 'Registration failed'
       });
     }
   }

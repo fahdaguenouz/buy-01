@@ -1,0 +1,58 @@
+<div class="register-container">
+  <mat-card class="register-card">
+    <mat-card-header>
+      <mat-card-title>Join 01Buy</mat-card-title>
+    </mat-card-header>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+      <mat-card-content>
+        <div class="name-row">
+          <mat-form-field appearance="outline">
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName" placeholder="John">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName" placeholder="Doe">
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username" placeholder="johndoe123">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="john@example.com">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Account Type</mat-label>
+          <mat-select formControlName="role">
+            <mat-option *ngFor="let role of roles" [value]="role">
+              {{ role === 'SELLER' ? 'Seller (Manage Products)' : 'Client (Browse & Buy)' }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" type="password" placeholder="Min 6 characters">
+        </mat-form-field>
+
+        <div class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button color="primary" class="full-width" [disabled]="registerForm.invalid">
+          CREATE ACCOUNT
+        </button>
+        <button mat-button type="button" class="login-link" routerLink="/login">
+          Already a member? Sign In
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+</div>
