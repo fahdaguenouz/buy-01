@@ -1,34 +1,36 @@
 <div class="login-container">
-  <mat-card class="login-card">
-    <mat-card-header>
-      <mat-card-title>Welcome to Buy 01</mat-card-title>
-      <mat-card-subtitle>Sign in to your account</mat-card-subtitle>
-    </mat-card-header>
+    <mat-card class="login-card">
+        <mat-card-header>
+            <mat-card-title>Welcome to Buy 01</mat-card-title>
+            <mat-card-subtitle>Sign in to your account</mat-card-subtitle>
+        </mat-card-header>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <mat-card-content>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" placeholder="example@mail.com" type="email">
-          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Please enter a valid email</mat-error>
-        </mat-form-field>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <mat-card-content>
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Username or Email</mat-label>
+                    <input matInput formControlName="username" placeholder="Enter your username or email">
+                    <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
+                        Identifier is required
+                    </mat-error>
+                </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
-          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
-            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
-        </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Password</mat-label>
+                    <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+                    <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+                        <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                    </button>
+                </mat-form-field>
 
-        <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
-      </mat-card-content>
+                <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+            </mat-card-content>
 
-      <mat-card-actions>
-        <button mat-raised-button color="primary" class="full-width" [disabled]="loginForm.invalid">
-          LOGIN
-        </button>
-      </mat-card-actions>
-    </form>
-  </mat-card>
+            <mat-card-actions>
+                <button mat-raised-button color="primary" class="full-width" [disabled]="loginForm.invalid">
+                    LOGIN
+                </button>
+            </mat-card-actions>
+        </form>
+    </mat-card>
 </div>

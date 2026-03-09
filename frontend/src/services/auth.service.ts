@@ -13,7 +13,7 @@ export class AuthService {
 
   login(credentials: any): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(AUTH_API + 'login', {
-      email: credentials.email,
+      identifier: credentials.username,
       password: credentials.password
     });
   }
