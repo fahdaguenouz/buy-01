@@ -1,0 +1,25 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh; // Center vertically in viewport
+  padding: 20px;
+
+  .login-card {
+    max-width: 400px;
+    width: 100%;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .full-width {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .error-msg {
+    color: #f44336;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+}
