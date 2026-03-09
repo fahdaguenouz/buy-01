@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex, HttpServletRequest req) {
         log.warn("Failed login attempt at {}", req.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                body(HttpStatus.UNAUTHORIZED, "Invalid email, username, or password.", req));
+                body(HttpStatus.UNAUTHORIZED, "Invalid email/username, or password.", req));
     }
 
     // ✅ Handled: Validation errors from DTOs (e.g., password too short, invalid

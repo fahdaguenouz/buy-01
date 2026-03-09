@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { UserRole } from '../../../models/user.model';
+import { ToasterService } from '../../../shared/components/Toaster/toast';
 
 @Component({
   selector: 'app-register',
@@ -18,7 +19,9 @@ export class RegisterComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+        private toast: ToasterService
+    
   ) {}
 
   ngOnInit(): void {
@@ -35,8 +38,15 @@ export class RegisterComponent implements OnInit {
   onRegister() {
     if (this.registerForm.valid) {
       this.authService.register(this.registerForm.value).subscribe({
-        next: () => this.router.navigate(['/login']),
-        error: (err) => this.errorMessage = err.error.message || 'Registration failed'
+        next: () => {
+          this.toast.showSuccess('Registration successful!'); // Show success toast
+          this.router.navigate(['/login']);
+        },
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Registration failed';
+          this.errorMessage = errorMsg;
+          this.toast.showError(errorMsg);
+        }
       });
     }
   }

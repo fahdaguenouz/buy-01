@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { TokenStorageService } from '../../../services/token-storage.service';
+import { ToasterService } from '../../../shared/components/Toaster/toast';
 
 @Component({
   standalone: false,
@@ -20,6 +21,7 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private tokenStorage: TokenStorageService,
     private router: Router,
+    private toast: ToasterService
   ) {}
 
   ngOnInit(): void {
@@ -44,12 +46,14 @@ export class LoginComponent implements OnInit {
         
         // 3. Trigger the BehaviorSubject with the EXACT same object
         this.authService.setLoggedInUser(currentUser);
-        
+        this.toast.showSuccess('Login successful!'); // Show success toast
         // 4. Navigate away
         this.router.navigate(['/products']);
       },
       error: (err) => {
-        this.errorMessage = err.error.message || 'Check your credentials.';
+          const errorMsg = err.error?.message || 'Invalid username or password.';
+        this.errorMessage =errorMsg;
+        this.toast.showError(errorMsg);
       },
     });
   }

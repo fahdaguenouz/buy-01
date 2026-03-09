@@ -37,3 +37,24 @@ body {
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+/* Add this to your existing styles.scss */
+
+.success-snackbar {
+  background-color: #4caf50 !important; /* Material Green */
+  color: white !important;
+}
+
+.success-snackbar .mat-mdc-button {
+  color: white !important; /* Makes the "Close" button visible */
+}
+
+.error-snackbar {
+  background-color: #f44336 !important; /* Material Red */
+  color: white !important;
+}
+
+.error-snackbar .mat-mdc-button {
+  color: white !important;
+}
