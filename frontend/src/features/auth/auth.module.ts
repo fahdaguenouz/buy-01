@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select'; // Added for Registr
 
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
+import { RouterModule } from '@angular/router';
 
 
 @NgModule({
@@ -22,6 +23,7 @@ import { RegisterComponent } from './register/register.component';
     ReactiveFormsModule,
     MatCardModule,
     MatInputModule,
+    RouterModule,
     MatButtonModule,
     MatFormFieldModule,
     MatIconModule,

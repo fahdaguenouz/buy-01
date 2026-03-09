@@ -1,0 +1,17 @@
+<div class="product-grid">
+  <mat-card class="product-card" *ngFor="let product of products">
+    <img mat-card-image [src]="product.imageUrls[0]" [alt]="product.name" class="product-img">
+
+    <mat-card-content>
+      <div class="product-info">
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="product-price">{{ product.price | currency }}</p>
+      </div>
+      <p class="product-description">{{ product.description }}</p>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-flat-button color="primary" class="full-width">VIEW DETAILS</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
