@@ -29,24 +29,29 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.authService.login(this.loginForm.value).subscribe({
-        next: (data) => {
-          console.log('Backend Response:', data); // <--- Check if it's 'data.user' or just 'data'
-          this.tokenStorage.saveToken(data.token);
+ onSubmit(): void {
+  if (this.loginForm.valid) {
+    this.authService.login(this.loginForm.value).subscribe({
+      next: (data) => {
+        console.log('Backend Response:', data); 
+        
+        // 1. Determine the actual user object (handles both nested and flat responses)
+        const currentUser = data.user || data; 
 
-          // If your backend returns { token: '...', id: 1, email: '...' }
-          // without a nested 'user' object, use 'data' directly:
-          this.tokenStorage.saveUser(data.user || data);
-            this.authService.setLoggedInUser(data.user);
-          // Navigate to /products explicitly to ensure the guard catches it
-          this.router.navigate(['/products']);
-        },
-        error: (err) => {
-          this.errorMessage = err.error.message || 'Check your credentials.';
-        },
-      });
-    }
+        // 2. Save token and user to local storage
+        this.tokenStorage.saveToken(data.token);
+        this.tokenStorage.saveUser(currentUser);
+        
+        // 3. Trigger the BehaviorSubject with the EXACT same object
+        this.authService.setLoggedInUser(currentUser);
+        
+        // 4. Navigate away
+        this.router.navigate(['/products']);
+      },
+      error: (err) => {
+        this.errorMessage = err.error.message || 'Check your credentials.';
+      },
+    });
   }
+}
 }
