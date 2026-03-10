@@ -31,28 +31,26 @@ export class LoginComponent implements OnInit {
     });
   }
 
- onSubmit(): void {
+// Inside your onSubmit() method:
+onSubmit(): void {
   if (this.loginForm.valid) {
     this.authService.login(this.loginForm.value).subscribe({
       next: (data) => {
-        console.log('Backend Response:', data); 
-        
-        // 1. Determine the actual user object (handles both nested and flat responses)
-        const currentUser = data.user || data; 
-
-        // 2. Save token and user to local storage
+        // 1. Just save the token!
         this.tokenStorage.saveToken(data.token);
-        this.tokenStorage.saveUser(currentUser);
         
-        // 3. Trigger the BehaviorSubject with the EXACT same object
-        this.authService.setLoggedInUser(currentUser);
-        this.toast.showSuccess('Login successful!'); // Show success toast
-        // 4. Navigate away
-        this.router.navigate(['/products']);
+        // 2. Retrieve the decoded user from the token we just saved
+        const decodedUser = this.tokenStorage.getUser();
+        
+        if (decodedUser) {
+          this.authService.setLoggedInUser(decodedUser);
+          this.toast.showSuccess('Login successful!');
+          this.router.navigate(['/products']);
+        }
       },
       error: (err) => {
-          const errorMsg = err.error?.message || 'Invalid username or password.';
-        this.errorMessage =errorMsg;
+        const errorMsg = err.error?.message || 'Invalid username or password.';
+        this.errorMessage = errorMsg;
         this.toast.showError(errorMsg);
       },
     });
