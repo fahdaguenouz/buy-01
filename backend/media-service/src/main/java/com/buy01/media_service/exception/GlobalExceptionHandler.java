@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -55,6 +56,13 @@ public class GlobalExceptionHandler {
                 body(HttpStatus.FORBIDDEN, "Access Denied. You do not have permission to perform this action.", req));
     }
 
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<?> handleNoResourceFound(NoResourceFoundException ex, HttpServletRequest req) {
+        log.warn("Resource not found at {}: {}", req.getRequestURI(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                body(HttpStatus.NOT_FOUND, "The requested endpoint or resource was not found.", req));
+    }
+
     // Add this alongside your other handlers
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<?> handleMissingFile(MissingServletRequestPartException ex, HttpServletRequest req) {
@@ -64,19 +72,24 @@ public class GlobalExceptionHandler {
                         "A file is required. Please ensure you are sending a multipart request with the key 'file'.",
                         req));
     }
+
     // ✅ Handled: Request is not a multipart/form-data request
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<?> handleMultipartException(MultipartException ex, HttpServletRequest req) {
         log.warn("Multipart request error at {}: {}", req.getRequestURI(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                body(HttpStatus.BAD_REQUEST, "The request must be a file upload. Please ensure your client is sending a 'multipart/form-data' request.", req));
+                body(HttpStatus.BAD_REQUEST,
+                        "The request must be a file upload. Please ensure your client is sending a 'multipart/form-data' request.",
+                        req));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<?> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest req) {
+    public ResponseEntity<?> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex,
+            HttpServletRequest req) {
         log.warn("Method not supported at {}: {}", req.getRequestURI(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(
-                body(HttpStatus.METHOD_NOT_ALLOWED, "HTTP method not allowed for this endpoint. " + ex.getMessage(), req));
+                body(HttpStatus.METHOD_NOT_ALLOWED, "HTTP method not allowed for this endpoint. " + ex.getMessage(),
+                        req));
     }
 
     // ✅ Fallback: Catch-all for any other unhandled exceptions

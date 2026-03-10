@@ -64,28 +64,37 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  private processUpdate(result: any) {
-    // If file exists, upload media first, then update user
+private processUpdate(result: any) {
     if (result.file) {
       this.mediaService.uploadImage(result.file).subscribe({
-        next: (res) => this.finalizeUpdate(result, res.url),
-        error: () => this.toast.showError('Image upload failed'),
+        next: (res: any[]) => {
+          if (res && res.length > 0) {
+            // 🔥 FIX 1: Send the fileName (ID), not the full URL
+            const fileName = res[0].fileName; 
+            this.finalizeUpdate(result, fileName);
+          }
+        },
+        error: (err) => {
+          this.toast.showError('Image upload failed');
+        },
       });
     } else {
       this.finalizeUpdate(result);
     }
   }
 
-  private finalizeUpdate(formValues: any, newAvatar?: string) {
+  private finalizeUpdate(formValues: any, fileName?: string) {
     const payload = {
       firstName: formValues.firstName,
       lastName: formValues.lastName,
-      ...(newAvatar && { avatarUrl: newAvatar }),
+      // 🔥 FIX 2: Use 'avatarMediaId' to match your Spring DTO
+      ...(fileName && { avatarMediaId: fileName }), 
     };
 
     this.userService.updateProfile(payload).subscribe({
-      next: (updated) => {
-        this.authService.setLoggedInUser({ ...this.user, ...updated } as User);
+      next: (updated: any) => {
+        // Updated will now have the full URL thanks to your mapToResponse logic
+        this.authService.setLoggedInUser({ ...this.user, ...updated });
         this.toast.showSuccess('Profile updated!');
       },
     });

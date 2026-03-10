@@ -9,9 +9,10 @@ export class MediaService {
 
   uploadImage(file: File): Observable<any> {
     const formData = new FormData();
-    formData.append('file', file); // The backend expects a multipart form-data part named 'file'
+    // The name 'file' matches your @RequestParam("file") perfectly
+    formData.append('file', file); 
 
-    // Your Gateway routes /media to the Media Service
-    return this.http.post(`${environment.gatewayUrl}/media/images`, formData);
+    // 🔥 FIX: Changed from /images to /upload
+    return this.http.post(`${environment.gatewayUrl}/api/media/upload`, formData);
   }
 }

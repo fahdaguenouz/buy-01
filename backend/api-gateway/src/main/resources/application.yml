@@ -67,6 +67,7 @@ spring:
             - Path=/api/media/**
           filters:
             - AuthenticationFilter
+            
 
 eureka:
   client:

@@ -11,7 +11,7 @@ export interface User {
   lastName: string;
   username: string;
   role: UserRole;
-  avatarUrl?: string;
+  avatarMediaId?: string;
 }
 
 export interface AuthResponse {
