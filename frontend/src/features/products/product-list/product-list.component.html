@@ -1,6 +1,18 @@
-<div class="product-grid">
+<div *ngIf="isLoading" class="loading-state">
+  <h3>Loading catalog...</h3>
+</div>
+
+<div *ngIf="!isLoading && products.length === 0" class="empty-state">
+  <h3>No products found!</h3>
+  <p>Check back later or register as a Seller to add some.</p>
+</div>
+
+<div class="product-grid" *ngIf="!isLoading && products.length > 0">
   <mat-card class="product-card" *ngFor="let product of products">
-    <img mat-card-image [src]="product.imageUrls[0]" [alt]="product.name" class="product-img">
+
+    <img mat-card-image
+      [src]="product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : '/images/product.jpeg'"
+      [alt]="product.name" class="product-img">
 
     <mat-card-content>
       <div class="product-info">

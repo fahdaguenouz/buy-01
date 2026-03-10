@@ -54,3 +54,13 @@
     width: 100%;
   }
 }
+
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 50px;
+  color: #666;
+  
+  h3 {
+    font-weight: 500;
+  }
+}

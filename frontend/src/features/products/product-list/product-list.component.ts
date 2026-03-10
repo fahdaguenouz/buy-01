@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Product } from '../../../models/product.model';
+import { ProductService } from '../../../services/product.service'; // Adjust path
+import { ToasterService } from '../../../shared/components/Toaster/toast';
 
 @Component({
   selector: 'app-product-list',
@@ -8,38 +10,30 @@ import { Product } from '../../../models/product.model';
   standalone: false,
 })
 export class ProductListComponent implements OnInit {
-  // Mock data for testing the UI
-  products: Product[] = [
-    {
-      name: 'Gaming Laptop',
-      price: 1200,
-      description: 'High performance laptop',
-      imageUrls: ['https://via.placeholder.com/300'],
-      sellerId: '1',
-    },
-    {
-      name: 'Wireless Mouse',
-      price: 25,
-      description: 'Ergonomic mouse',
-      imageUrls: ['https://via.placeholder.com/300'],
-      sellerId: '1',
-    },
-    {
-      name: 'Mechanical Keyboard',
-      price: 80,
-      description: 'RGB backlit keys',
-      imageUrls: ['https://via.placeholder.com/300'],
-      sellerId: '2',
-    },
-  ];
+  products: Product[] = [];
+  isLoading = true;
 
-  constructor() {}
+  constructor(
+    private productService: ProductService,
+    private toast: ToasterService
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadProducts();
+  }
 
-  // In your ProductListComponent
-  logout() {
-    localStorage.clear();
-    window.location.href = '/login';
+  loadProducts(): void {
+    this.isLoading = true;
+    this.productService.getAllProducts().subscribe({
+      next: (data) => {
+        this.products = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.toast.showError('Failed to load products from the server.');
+        console.error('Error fetching products:', err);
+      }
+    });
   }
 }
