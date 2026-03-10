@@ -1,0 +1,45 @@
+.profile-info-card {
+  max-width: 500px;
+  width: 100%;
+  padding: 30px;
+  text-align: center;
+  border-radius: 16px;
+
+  .profile-header {
+    margin-bottom: 20px;
+    .avatar-display img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid #f0f0f0;
+      object-fit: cover;
+    }
+    h2 { margin: 15px 0 5px; font-weight: 600; }
+    .role-chip {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+  }
+
+  .info-list {
+    text-align: left;
+    margin: 20px 0;
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      mat-icon { color: #666; }
+      label { font-size: 0.75rem; color: #999; display: block; }
+      p { margin: 0; font-weight: 500; }
+    }
+  }
+
+  .edit-btn {
+    margin-top: 10px;
+  }
+}

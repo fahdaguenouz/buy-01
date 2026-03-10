@@ -4,6 +4,7 @@ import { NoAuthGuard } from '../core/guards/no-auth.guard';
 import { RegisterComponent } from '../features/auth/register/register.component';
 import { AuthGuard } from '../core/guards/auth.guard';
 import { ProductListComponent } from '../features/products/product-list/product-list.component';
+import { ProfileComponent } from '../features/profile/profile.component';
 
 
 export const routes: Routes = [
@@ -24,6 +25,7 @@ export const routes: Routes = [
     component: ProductListComponent, // Placeholder for now
     canActivate: [AuthGuard] 
   },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
 
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }
