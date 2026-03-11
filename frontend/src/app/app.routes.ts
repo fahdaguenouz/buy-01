@@ -9,39 +9,45 @@ import { AddProductComponent } from '../features/products/product-create/create-
 import { ProductDetailComponent } from '../features/products/product-detail/product-detail.component';
 import { SellerDashboardComponent } from '../features/products/seller-dashboard/seller-dashboard.component';
 
-
 export const routes: Routes = [
-  { 
-    path: 'login', 
-    component: LoginComponent, 
-    canActivate: [NoAuthGuard] // If logged in, go to home
+  {
+    path: 'login',
+    component: LoginComponent,
+    canActivate: [NoAuthGuard], // If logged in, go to home
   },
-  { 
-    path: 'register', 
-    component: RegisterComponent, 
-    canActivate: [NoAuthGuard] 
+  {
+    path: 'register',
+    component: RegisterComponent,
+    canActivate: [NoAuthGuard],
   },
-  
+
   // Example of a protected route we will build soon
-  { 
-    path: 'products', 
+  {
+    path: 'products',
     component: ProductListComponent, // Placeholder for now
-    canActivate: [AuthGuard] 
+    canActivate: [AuthGuard],
   },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-  { 
-    path: 'add-product', 
-    component: AddProductComponent, 
+  {
+    path: 'add-product',
+    component: AddProductComponent,
     canActivate: [AuthGuard],
-    data: { expectedRole: 'SELLER' } 
+    data: { expectedRole: 'SELLER' },
   },
-   { 
-    path: 'seller-dashboard', 
+
+  {
+    path: 'add-product/:id',
+    component: AddProductComponent,
+    canActivate: [AuthGuard],
+    data: { expectedRole: 'SELLER' },
+  },
+  {
+    path: 'seller-dashboard',
     component: SellerDashboardComponent,
     canActivate: [AuthGuard],
-    data: { expectedRole: 'SELLER' } 
+    data: { expectedRole: 'SELLER' },
   },
   { path: 'products/:id', component: ProductDetailComponent },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: '**', redirectTo: '/login' }
+  { path: '**', redirectTo: '/login' },
 ];
