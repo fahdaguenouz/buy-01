@@ -18,7 +18,7 @@
 
   <div class="product-grid" *ngIf="filteredProducts.length > 0">
     <mat-card class="product-card" *ngFor="let product of filteredProducts">
-      <img mat-card-image [src]="product.mediaIds[0] || 'assets/product.jpeg'" [alt]="product.name">
+      <img mat-card-image [src]="product.mediaIds[0] || 'images/product.jpeg'" [alt]="product.name">
       <mat-card-content>
         <h3>{{ product.name }}</h3>
         <p>{{ product.price | currency }}</p>

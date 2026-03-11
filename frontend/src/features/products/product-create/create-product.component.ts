@@ -76,33 +76,41 @@ export class AddProductComponent implements OnInit {
     }
   }
 
-  onSubmit() {
-    if (this.productForm.invalid) return;
+onSubmit() {
+  if (this.productForm.invalid) return;
 
-    const uploadObservables = this.files.length > 0 
-      ? this.files.map(file => this.mediaService.uploadImage(file))
-      : of([]);
+  const uploadObservables = this.files.length > 0 
+    ? this.files.map(file => this.mediaService.uploadImage(file))
+    : of([]);
 
-    forkJoin(uploadObservables).subscribe({
-      next: (responses: any[]) => {
-        // Flatten responses if nested
-        const newMediaIds = responses.flat().map(res => res.fileName);
-        const finalMediaIds = [...this.existingMedia, ...newMediaIds];
-        const payload = { ...this.productForm.value, mediaIds: finalMediaIds };
+  forkJoin(uploadObservables).subscribe({
+    next: (responses: any[]) => {
+      // FIX: Your controller returns List<Map>. 
+      // responses is an array of [List<Map>]. We need to flatten and extract.
+      const newMediaIds = responses.flat().map(item => item.fileName);
+      
+      const finalMediaIds = [...this.existingMedia, ...newMediaIds];
+      
+      const payload = { 
+        ...this.productForm.value, 
+        mediaIds: finalMediaIds 
+      };
 
-        // Ensure updateProduct returns an Observable in your service
-        const action$: Observable<any> = this.isEditMode 
-          ? this.productService.updateProduct(this.productId!, payload) 
-          : this.productService.createProduct(payload);
+      const action$ = this.isEditMode 
+        ? this.productService.updateProduct(this.productId!, payload) 
+        : this.productService.createProduct(payload);
 
-        action$.subscribe({
-          next: () => {
-            this.toast.showSuccess(`Product ${this.isEditMode ? 'updated' : 'created'}!`);
-            this.router.navigate(['/']);
-          },
-          error: () => this.toast.showError('Operation failed')
-        });
-      }
-    });
-  }
+      action$.subscribe({
+        next: () => {
+          this.toast.showSuccess(`Product ${this.isEditMode ? 'updated' : 'created'}!`);
+          this.router.navigate(['/seller-dashboard']); // Redirect to dashboard
+        },
+        error: (err) => {
+          console.error(err);
+          this.toast.showError('Operation failed. Check console.');
+        }
+      });
+    }
+  });
+}
 }
