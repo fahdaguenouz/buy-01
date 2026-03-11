@@ -26,7 +26,7 @@ public class ProductService {
     private String mediaServiceBaseUrl;
 
     public ProductResponse createProduct(ProductRequest request, String sellerId) {
-        
+
         // 1. Sanitize the incoming media IDs so we ONLY store the filename
         List<String> cleanMediaIds = new ArrayList<>();
         if (request.mediaIds() != null) {
@@ -41,7 +41,7 @@ public class ProductService {
                 .price(request.price())
                 .stockQuantity(request.stockQuantity())
                 .category(request.category())
-                .sellerId(sellerId) 
+                .sellerId(sellerId)
                 .mediaIds(cleanMediaIds) // Save only "abc.jpg" or "xyz.png"
                 .build();
 
@@ -74,7 +74,7 @@ public class ProductService {
                 .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
 
         if (!product.getSellerId().equals(sellerId)) {
-            log.warn("Security Alert: User {} attempted to delete Product {} belonging to {}", 
+            log.warn("Security Alert: User {} attempted to delete Product {} belonging to {}",
                     sellerId, productId, product.getSellerId());
             throw new SecurityException("You do not have permission to delete this product.");
         }
@@ -93,17 +93,29 @@ public class ProductService {
     }
 
     public void updateProduct(String productId, ProductRequest request, String sellerId) {
-    Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new IllegalArgumentException("Not found"));
-    
-    // SECURITY: Only the owner can update
-    if (!product.getSellerId().equals(sellerId)) {
-        throw new SecurityException("Unauthorized");
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        if (!product.getSellerId().equals(sellerId))
+            throw new SecurityException("Unauthorized");
+
+        // Update basic fields
+        product.setName(request.name());
+        product.setPrice(request.price());
+        product.setDescription(request.description());
+        product.setStockQuantity(request.stockQuantity());
+        product.setCategory(request.category());
+
+       
+
+        List<String> cleanMediaIds = new ArrayList<>();
+        for (String mediaUrl : request.mediaIds()) {
+            cleanMediaIds.add(extractFilename(mediaUrl));
+        }
+        product.setMediaIds(cleanMediaIds);
+
+        productRepository.save(product);
     }
-    
-    // ... update logic
-    productRepository.save(product);
-}
 
     private ProductResponse mapToResponse(Product product) {
         List<String> mediaUrls = new ArrayList<>();
@@ -131,7 +143,8 @@ public class ProductService {
                 .build();
     }
 
-    // Helper method to extract "abc.jpg" from "http://localhost:8083/api/media/images/abc.jpg"
+    // Helper method to extract "abc.jpg" from
+    // "http://localhost:8083/api/media/images/abc.jpg"
     private String extractFilename(String urlOrId) {
         if (urlOrId == null || urlOrId.trim().isEmpty()) {
             return urlOrId;

@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../../services/product.service';
 import { ToasterService } from '../../../shared/components/Toaster/toast';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of, Observable } from 'rxjs';
 import { MediaService } from '../../../services/media.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+
 @Component({
   standalone: false,
   selector: 'app-add-product',
@@ -14,16 +15,21 @@ import { Router } from '@angular/router';
 export class AddProductComponent implements OnInit {
   productForm!: FormGroup;
   maxMedia = 4;
-
+  isEditMode = false;
+  productId: string | null = null;
+  
   files: File[] = [];
-  previewUrls: string[] = [];
+  previewUrls: string[] = []; 
+  existingMedia: string[] = [];
   categories: any[] = [];
+
   constructor(
     private fb: FormBuilder,
     private productService: ProductService,
     private toast: ToasterService,
     private mediaService: MediaService,
     private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -33,93 +39,69 @@ export class AddProductComponent implements OnInit {
       price: [0, [Validators.required, Validators.min(0.01)]],
       stockQuantity: [1, [Validators.required, Validators.min(1)]],
       category: ['', [Validators.required]],
-      media: this.fb.array([this.fb.control(null)]),
     });
+
+    this.productId = this.route.snapshot.paramMap.get('id');
+    if (this.productId) {
+      this.isEditMode = true;
+      this.productService.getProductById(this.productId).subscribe(product => {
+        this.productForm.patchValue(product);
+        this.existingMedia = product.mediaIds || [];
+        this.previewUrls = [...this.existingMedia];
+      });
+    }
+
     this.productService.getCategories().subscribe({
       next: (data) => (this.categories = data),
-      error: () => this.toast.showError('Could not load categories'),
     });
-  }
-
-  get media(): FormArray {
-    return this.productForm.get('media') as FormArray;
-  }
-
-  addMedia() {
-    if (this.media.length < this.maxMedia) {
-      this.media.push(this.fb.control(null));
-    }
   }
 
   removeMedia(index: number) {
-    if (this.media.length > 1) {
-      this.media.removeAt(index);
-      this.files.splice(index, 1);
-      this.previewUrls.splice(index, 1);
+    this.previewUrls.splice(index, 1);
+    if (index < this.existingMedia.length) {
+      this.existingMedia.splice(index, 1);
+    } else {
+      this.files.splice(index - this.existingMedia.length, 1);
     }
   }
-  resetForm() {
-    this.productForm.reset();
-    this.media.clear();
-    this.media.push(this.fb.control(null));
-    this.files = [];
-    this.previewUrls = [];
-  }
 
-  onFileSelected(event: any, index: number) {
+  onFileSelected(event: any) {
     const file = event.target.files[0];
-
-    if (file) {
-      this.files[index] = file;
-
+    if (file && this.previewUrls.length < this.maxMedia) {
+      this.files.push(file);
       const reader = new FileReader();
-      reader.onload = () => {
-        this.previewUrls[index] = reader.result as string;
-      };
-
+      reader.onload = () => this.previewUrls.push(reader.result as string);
       reader.readAsDataURL(file);
     }
   }
-  isLoading = false;
 
   onSubmit() {
-    this.isLoading = true;
     if (this.productForm.invalid) return;
 
-    // Filter out any undefined/null slots in the files array before mapping
-    const validFiles = this.files.filter((file) => !!file);
+    const uploadObservables = this.files.length > 0 
+      ? this.files.map(file => this.mediaService.uploadImage(file))
+      : of([]);
 
-    if (validFiles.length === 0) {
-      this.toast.showError('Please upload at least one image');
-      return;
-    }
-
-    const uploads = validFiles.map((file) => this.mediaService.uploadImage(file));
-
-    forkJoin(uploads).subscribe({
+    forkJoin(uploadObservables).subscribe({
       next: (responses: any[]) => {
-        // Map the filenames from response
-        const mediaIds = responses.map((res) => res[0]?.fileName || res.fileName);
+        // Flatten responses if nested
+        const newMediaIds = responses.flat().map(res => res.fileName);
+        const finalMediaIds = [...this.existingMedia, ...newMediaIds];
+        const payload = { ...this.productForm.value, mediaIds: finalMediaIds };
 
-        const payload = {
-          ...this.productForm.value,
-          mediaIds: mediaIds,
-        };
+        // Ensure updateProduct returns an Observable in your service
+        const action$: Observable<any> = this.isEditMode 
+          ? this.productService.updateProduct(this.productId!, payload) 
+          : this.productService.createProduct(payload);
 
-        this.productService.createProduct(payload).subscribe({
+        action$.subscribe({
           next: () => {
-            this.toast.showSuccess('Product added successfully!');
-            this.resetForm();
-            // 3. Redirect to home page
+            this.toast.showSuccess(`Product ${this.isEditMode ? 'updated' : 'created'}!`);
             this.router.navigate(['/']);
           },
-          error: (err) => {
-            console.error(err);
-            this.toast.showError('Product creation failed');
-          },
+          error: () => this.toast.showError('Operation failed')
         });
-      },
-      error: () => this.toast.showError('Image upload failed'),
+      }
     });
   }
 }
