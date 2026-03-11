@@ -18,24 +18,45 @@ export class ProductListComponent implements OnInit {
     private toast: ToasterService
   ) {}
 
-  ngOnInit(): void {
-    this.loadProducts();
+  filteredProducts: Product[] = [];
+  categories: any[] = [];
+  selectedCategory: string = 'All';
+
+
+ ngOnInit(): void {
+  // Use the method that handles the loading state
+  this.loadProducts(); 
+
+  // Load Categories
+  this.productService.getCategories().subscribe({
+    next: (data) => this.categories = data,
+    error: (err) => console.error("Could not load categories", err)
+  });
+}
+
+  filterByCategory(categoryName: string): void {
+    this.selectedCategory = categoryName;
+    if (categoryName === 'All') {
+      this.filteredProducts = this.products;
+    } else {
+      this.filteredProducts = this.products.filter(p => p.category === categoryName);
+    }
   }
 
+
   loadProducts(): void {
-    this.isLoading = true;
-    this.productService.getAllProducts().subscribe({
-      next: (data) => {
-        console.log(data);
-        
-        this.products = data;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.toast.showError('Failed to load products from the server.');
-        console.error('Error fetching products:', err);
-      }
-    });
-  }
+  this.isLoading = true;
+  this.productService.getAllProducts().subscribe({
+    next: (data) => {
+      this.products = data;
+      // Initialize with all products selected
+      this.filteredProducts = data; 
+      this.isLoading = false;
+    },
+    error: (err) => {
+      this.isLoading = false;
+      this.toast.showError('Failed to load products.');
+    }
+  });
+}
 }

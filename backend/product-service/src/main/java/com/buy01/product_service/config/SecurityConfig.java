@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health/**").permitAll()
                         // In SecurityConfig.java for User, Product, and Media
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
                         // Anyone (even guests) can browse products
                         .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
                         // Everything else (Create, Update, Delete) requires a token

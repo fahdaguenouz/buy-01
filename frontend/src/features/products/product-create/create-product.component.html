@@ -28,9 +28,9 @@
         <label>Category</label>
         <select formControlName="category">
           <option value="" disabled selected>Select a category</option>
-          <option value="ELECTRONICS">Electronics</option>
-          <option value="CLOTHING">Clothing</option>
-          <option value="HOME">Home</option>
+          <option *ngFor="let cat of categories" [value]="cat.name">
+            {{ cat.name }}
+          </option>
         </select>
       </div>
 

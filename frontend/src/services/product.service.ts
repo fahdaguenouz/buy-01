@@ -6,6 +6,7 @@ import { environment } from '../environments/environment';
 
 // Assuming your Gateway routes /products to the Product Service
 const PRODUCT_API = `${environment.gatewayUrl}/products`; 
+const CATEGORY_API = `${environment.gatewayUrl}/categories`;
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,11 @@ const PRODUCT_API = `${environment.gatewayUrl}/products`;
 export class ProductService {
 
   constructor(private http: HttpClient) {}
+  // product.service.ts
+
+getCategories(): Observable<any[]> {
+  return this.http.get<any[]>(CATEGORY_API);
+}
 
   // Public endpoint to get all products
   getAllProducts(): Observable<Product[]> {

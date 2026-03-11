@@ -4,6 +4,7 @@ import { ProductService } from '../../../services/product.service';
 import { ToasterService } from '../../../shared/components/Toaster/toast';
 import { forkJoin } from 'rxjs';
 import { MediaService } from '../../../services/media.service';
+import { Router } from '@angular/router';
 @Component({
   standalone: false,
   selector: 'app-add-product',
@@ -16,12 +17,13 @@ export class AddProductComponent implements OnInit {
 
   files: File[] = [];
   previewUrls: string[] = [];
-
+  categories: any[] = [];
   constructor(
     private fb: FormBuilder,
     private productService: ProductService,
     private toast: ToasterService,
     private mediaService: MediaService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -32,6 +34,10 @@ export class AddProductComponent implements OnInit {
       stockQuantity: [1, [Validators.required, Validators.min(1)]],
       category: ['', [Validators.required]],
       media: this.fb.array([this.fb.control(null)]),
+    });
+    this.productService.getCategories().subscribe({
+      next: (data) => (this.categories = data),
+      error: () => this.toast.showError('Could not load categories'),
     });
   }
 
@@ -74,24 +80,29 @@ export class AddProductComponent implements OnInit {
       reader.readAsDataURL(file);
     }
   }
+  isLoading = false;
 
   onSubmit() {
+    this.isLoading = true;
     if (this.productForm.invalid) return;
 
-    const uploads = this.files.map((file) => this.mediaService.uploadImage(file));
-    console.log(uploads);
+    // Filter out any undefined/null slots in the files array before mapping
+    const validFiles = this.files.filter((file) => !!file);
+
+    if (validFiles.length === 0) {
+      this.toast.showError('Please upload at least one image');
+      return;
+    }
+
+    const uploads = validFiles.map((file) => this.mediaService.uploadImage(file));
 
     forkJoin(uploads).subscribe({
       next: (responses: any[]) => {
-        // Extract filenames exactly like avatar upload
-        const mediaIds = responses.map((res) => res[0].fileName);
+        // Map the filenames from response
+        const mediaIds = responses.map((res) => res[0]?.fileName || res.fileName);
 
         const payload = {
-          name: this.productForm.value.name,
-          description: this.productForm.value.description,
-          price: this.productForm.value.price,
-          stockQuantity: this.productForm.value.stockQuantity,
-          category: this.productForm.value.category,
+          ...this.productForm.value,
           mediaIds: mediaIds,
         };
 
@@ -99,15 +110,15 @@ export class AddProductComponent implements OnInit {
           next: () => {
             this.toast.showSuccess('Product added successfully!');
             this.resetForm();
+            // 3. Redirect to home page
+            this.router.navigate(['/']);
           },
           error: (err) => {
-            console.log(err);
-
+            console.error(err);
             this.toast.showError('Product creation failed');
           },
         });
       },
-
       error: () => this.toast.showError('Image upload failed'),
     });
   }
