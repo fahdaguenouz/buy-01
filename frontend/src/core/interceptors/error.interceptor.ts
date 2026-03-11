@@ -15,20 +15,20 @@ export class ErrorInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(request).pipe(
-      catchError((err: HttpErrorResponse) => {
-        // If the backend rejects the token (or it's faked/expired)
-        if ([401, 403].includes(err.status)) {
-          this.tokenStorage.signOut(); // Clear the fake/expired token
-          this.toast.showError('Session expired or invalid. Please log in again.');
-          
-          // Force a hard redirect to login
-          window.location.href = '/login'; 
-        }
+  return next.handle(request).pipe(
+    catchError((err: HttpErrorResponse) => {
+      const isLoginRequest = request.url.includes('/auth/login');
 
-        const error = err.error?.message || err.statusText;
-        return throwError(() => error);
-      })
-    );
-  }
+      if ([401, 403].includes(err.status) && !isLoginRequest) {
+        // Only force logout/redirect if it's NOT the login page
+        this.tokenStorage.signOut();
+        this.toast.showError('Session expired. Please log in again.');
+        window.location.href = '/login'; 
+      }
+
+      // Pass the error back so the LoginComponent can catch it in its own .subscribe(error)
+      return throwError(() => err);
+    })
+  );
+}
 }

@@ -1,11 +1,16 @@
 <mat-toolbar color="primary" class="navbar">
   <span class="logo" routerLink="/">01Buy</span>
   <span class="spacer"></span>
+  
 
   <div *ngIf="isLoggedIn" class="user-section">
+    <button mat-button *ngIf="role === 'SELLER'" routerLink="/add-product" class="add-btn">
+      <mat-icon>add_circle</mat-icon>
+      Add Product
+    </button>
     <span class="role-badge" [ngClass]="role?.toLowerCase()">{{ role }}</span>
     <span class="welcome-text">Hi, {{ username }}</span>
-    
+
     <button mat-icon-button [matMenuTriggerFor]="menu">
       <mat-icon>account_circle</mat-icon>
     </button>

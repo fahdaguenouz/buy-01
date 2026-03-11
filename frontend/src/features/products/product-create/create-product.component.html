@@ -1,0 +1,47 @@
+<div class="product-container">
+  <div class="form-card">
+    <h2>🚀 List a New Product</h2>
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+      
+      <div class="form-grid">
+        <div class="field">
+          <label>Product Name</label>
+          <input type="text" formControlName="name" placeholder="e.g. Vintage Camera">
+        </div>
+
+        <div class="field">
+          <label>Price ($)</label>
+          <input type="number" formControlName="price" placeholder="0.00">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Category</label>
+        <select formControlName="category">
+          <option value="" disabled selected>Select a category</option>
+          <option value="ELECTRONICS">Electronics</option>
+          <option value="CLOTHING">Clothing</option>
+          <option value="HOME">Home</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Description</label>
+        <textarea formControlName="description" rows="3"></textarea>
+      </div>
+
+      <div class="media-section">
+        <label>Product Media (Max 4 Image URLs)</label>
+        <div class="media-grid" formArrayName="media">
+          <div *ngFor="let control of media.controls; let i = index">
+            <input [formControlName]="i" placeholder="Image URL {{i + 1}}">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="productForm.invalid" class="submit-btn">
+        Create Product
+      </button>
+    </form>
+  </div>
+</div>
