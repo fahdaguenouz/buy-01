@@ -6,9 +6,8 @@
 
   <div class="filter-container">
     <button [class.active]="selectedCategory === 'All'" (click)="filterByCategory('All')">All</button>
-    <button *ngFor="let cat of categories" 
-            [class.active]="selectedCategory === cat.name"
-            (click)="filterByCategory(cat.name)">
+    <button *ngFor="let cat of categories" [class.active]="selectedCategory === cat.name"
+      (click)="filterByCategory(cat.name)">
       {{ cat.name }}
     </button>
   </div>
@@ -19,14 +18,15 @@
 
   <div class="product-grid" *ngIf="filteredProducts.length > 0">
     <mat-card class="product-card" *ngFor="let product of filteredProducts">
-      <img mat-card-image [src]="product.mediaIds?.[0] || 'assets/product.jpeg'" [alt]="product.name">
+      <img mat-card-image [src]="product.mediaIds[0] || 'assets/product.jpeg'" [alt]="product.name">
       <mat-card-content>
         <h3>{{ product.name }}</h3>
         <p>{{ product.price | currency }}</p>
       </mat-card-content>
       <mat-card-actions>
-        <button mat-flat-button color="primary">VIEW DETAILS</button>
-      </mat-card-actions>
+        <button mat-flat-button color="primary" [routerLink]="['/products', product.id]">
+          VIEW DETAILS
+        </button> </mat-card-actions>
     </mat-card>
   </div>
 </div>

@@ -4,6 +4,10 @@
   
 
   <div *ngIf="isLoggedIn" class="user-section">
+    <button mat-button *ngIf="role === 'SELLER'" routerLink="/seller-dashboard" class="add-btn">
+      <mat-icon>add_circle</mat-icon>
+      Dashboard
+    </button>
     <button mat-button *ngIf="role === 'SELLER'" routerLink="/add-product" class="add-btn">
       <mat-icon>add_circle</mat-icon>
       Add Product

@@ -28,8 +28,8 @@ public class ProductController {
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<ProductResponse> createProduct(
             @Valid @RequestBody ProductRequest request,
-            @AuthenticationPrincipal String sellerId) { 
-        
+            @AuthenticationPrincipal String sellerId) {
+
         ProductResponse response = productService.createProduct(request, sellerId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -38,7 +38,7 @@ public class ProductController {
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<List<ProductResponse>> getMyProducts(
             @AuthenticationPrincipal String sellerId) {
-        
+
         return ResponseEntity.ok(productService.getProductsBySeller(sellerId));
     }
 
@@ -48,12 +48,23 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(
             @PathVariable String id,
             @AuthenticationPrincipal String sellerId) { // Gets the UUID from the JWT
-        
+
         productService.deleteProduct(id, sellerId);
         // Return 204 No Content indicating success but no response body
-        return ResponseEntity.noContent().build(); 
+        return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<Void> updateProduct(
+            @PathVariable String id,
+            @Valid @RequestBody ProductRequest request,
+            @AuthenticationPrincipal String sellerId) { // Gets the UUID from the JWT
+
+        productService.updateProduct(id,request, sellerId);
+        // Return 204 No Content indicating success but no response body
+        return ResponseEntity.ok().build();
+    }
     // ==========================================
     // PUBLIC ENDPOINTS (No Token Required)
     // ==========================================

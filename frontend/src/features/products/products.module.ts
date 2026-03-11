@@ -7,23 +7,31 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { ProductListComponent } from "./product-list/product-list.component";
 import { AddProductComponent } from "./product-create/create-product.component";
+import { ProductDetailComponent } from "./product-detail/product-detail.component";
+import { RouterModule } from "@angular/router";
+import { SellerDashboardComponent } from "./seller-dashboard/seller-dashboard.component";
 
 @NgModule({
   declarations: [
     ProductListComponent,
-    AddProductComponent 
+    AddProductComponent ,
+    ProductDetailComponent,
+    SellerDashboardComponent
   ],
   imports: [
     CommonModule,
     ReactiveFormsModule, 
     MatCardModule,
+    RouterModule,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule
   ],
   exports: [
     ProductListComponent,
-    AddProductComponent 
+    AddProductComponent,
+    ProductDetailComponent,
+    SellerDashboardComponent 
   ]
 })
 export class ProductsModule { }

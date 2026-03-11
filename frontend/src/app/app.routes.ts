@@ -6,6 +6,8 @@ import { AuthGuard } from '../core/guards/auth.guard';
 import { ProductListComponent } from '../features/products/product-list/product-list.component';
 import { ProfileComponent } from '../features/profile/profile.component';
 import { AddProductComponent } from '../features/products/product-create/create-product.component';
+import { ProductDetailComponent } from '../features/products/product-detail/product-detail.component';
+import { SellerDashboardComponent } from '../features/products/seller-dashboard/seller-dashboard.component';
 
 
 export const routes: Routes = [
@@ -33,6 +35,13 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { expectedRole: 'SELLER' } 
   },
+   { 
+    path: 'seller-dashboard', 
+    component: SellerDashboardComponent,
+    canActivate: [AuthGuard],
+    data: { expectedRole: 'SELLER' } 
+  },
+  { path: 'products/:id', component: ProductDetailComponent },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }
 ];

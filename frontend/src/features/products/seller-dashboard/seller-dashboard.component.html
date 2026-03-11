@@ -1,0 +1,30 @@
+<div *ngIf="myProducts.length === 0" class="empty-state">
+  <p>You haven't added any products yet.</p>
+  <button mat-flat-button color="primary" routerLink="/add-product">Create your first product</button>
+</div>
+<div class="dashboard-container">
+  <h2>My Products</h2>
+  <button mat-raised-button color="primary" routerLink="/add-product">Add New Product</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of myProducts">
+        <td>{{ p.name }}</td>
+        <td>{{ p.price | currency }}</td>
+        <td>{{ p.stockQuantity }}</td>
+        <td>
+          <button mat-button color="primary" [routerLink]="['/edit-product', p.id]">Edit</button>
+          <button mat-button color="warn" (click)="deleteProduct(p.id!)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

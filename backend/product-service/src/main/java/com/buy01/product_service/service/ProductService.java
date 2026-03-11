@@ -92,6 +92,19 @@ public class ProductService {
         }
     }
 
+    public void updateProduct(String productId, ProductRequest request, String sellerId) {
+    Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new IllegalArgumentException("Not found"));
+    
+    // SECURITY: Only the owner can update
+    if (!product.getSellerId().equals(sellerId)) {
+        throw new SecurityException("Unauthorized");
+    }
+    
+    // ... update logic
+    productRepository.save(product);
+}
+
     private ProductResponse mapToResponse(Product product) {
         List<String> mediaUrls = new ArrayList<>();
         if (product.getMediaIds() != null) {

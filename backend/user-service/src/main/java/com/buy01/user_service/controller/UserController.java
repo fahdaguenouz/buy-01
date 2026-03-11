@@ -20,6 +20,7 @@ public class UserController {
     private final UserRepository userRepository;
     @Value("${media-service.base-url:http://localhost:8083/api/media/images/}")
     private String mediaServiceBaseUrl;
+
     // GET /users/me - Fetch my own profile
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> getCurrentProfile(@AuthenticationPrincipal User currentUser) {
@@ -35,7 +36,7 @@ public class UserController {
         // Update the fields
         currentUser.setFirstName(request.firstName());
         currentUser.setLastName(request.lastName());
-        
+
         if (request.avatarMediaId() != null) {
             currentUser.setAvatarMediaId(request.avatarMediaId());
         }
@@ -47,12 +48,13 @@ public class UserController {
     }
 
     // Helper method to convert the User entity to a safe DTO
-   private UserProfileResponse mapToResponse(User user) {
-        
+    private UserProfileResponse mapToResponse(User user) {
+
         // Construct the full URL if the user has an avatar
         String fullAvatarUrl = null;
         if (user.getAvatarMediaId() != null && !user.getAvatarMediaId().isEmpty()) {
-            // Check if it's already a full URL (just in case the frontend sent the whole URL by mistake)
+            // Check if it's already a full URL (just in case the frontend sent the whole
+            // URL by mistake)
             if (user.getAvatarMediaId().startsWith("http")) {
                 fullAvatarUrl = user.getAvatarMediaId();
             } else {
@@ -68,7 +70,14 @@ public class UserController {
                 .lastName(user.getLastName())
                 .role(user.getRole())
                 // Pass the full URL to the frontend!
-                .avatarMediaId(fullAvatarUrl) 
+                .avatarMediaId(fullAvatarUrl)
                 .build();
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserProfileResponse> getUserById(@PathVariable String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        return ResponseEntity.ok(mapToResponse(user));
     }
 }

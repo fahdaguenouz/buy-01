@@ -1,0 +1,30 @@
+<div class="detail-container" *ngIf="product">
+    <div class="gallery">
+        <img [src]="product.mediaIds[selectedImageIndex] || 'assets/product.jpeg'" class="main-img">
+
+        <div class="thumbnails">
+            <img *ngFor="let url of product.mediaIds; let i = index" [src]="url" (click)="changeImage(i)"
+                [class.active]="selectedImageIndex === i">
+        </div>
+    </div>
+    <div class="info">
+        <h1>{{ product.name }}</h1>
+        <p class="price">{{ product.price | currency }}</p>
+
+        <p class="stock">
+            <strong>Availability:</strong>
+            <span [ngClass]="product.stockQuantity > 0 ? 'in-stock' : 'out-of-stock'">
+                {{ product.stockQuantity > 0 ? (product.stockQuantity + ' left in stock') : 'Out of stock' }}
+            </span>
+        </p>
+
+        <div class="seller-info" *ngIf="seller">
+            <p><strong>Sold by:</strong> {{ seller.username }}</p>
+        </div>
+
+        <p class="desc">{{ product.description }}</p>
+        <button mat-flat-button color="accent" [disabled]="product.stockQuantity === 0">
+            {{ product.stockQuantity > 0 ? 'BUY NOW' : 'OUT OF STOCK' }}
+        </button>
+    </div>
+</div>
