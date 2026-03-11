@@ -77,18 +77,26 @@ export class AddProductComponent implements OnInit {
   }
 
 onSubmit() {
-  if (this.productForm.invalid) return;
+  // 1. Form Validation Check
+  if (this.productForm.invalid) {
+    this.toast.showError('Please fill in all required fields.');
+    return;
+  }
 
+  // 2. Mandatory Media Check
+  if (this.previewUrls.length === 0) {
+    this.toast.showError('At least one product image is required.');
+    return;
+  }
+
+  // 3. Proceed with Uploads
   const uploadObservables = this.files.length > 0 
     ? this.files.map(file => this.mediaService.uploadImage(file))
     : of([]);
 
   forkJoin(uploadObservables).subscribe({
     next: (responses: any[]) => {
-      // FIX: Your controller returns List<Map>. 
-      // responses is an array of [List<Map>]. We need to flatten and extract.
       const newMediaIds = responses.flat().map(item => item.fileName);
-      
       const finalMediaIds = [...this.existingMedia, ...newMediaIds];
       
       const payload = { 
@@ -103,11 +111,11 @@ onSubmit() {
       action$.subscribe({
         next: () => {
           this.toast.showSuccess(`Product ${this.isEditMode ? 'updated' : 'created'}!`);
-          this.router.navigate(['/seller-dashboard']); // Redirect to dashboard
+          this.router.navigate(['/seller-dashboard']);
         },
         error: (err) => {
           console.error(err);
-          this.toast.showError('Operation failed. Check console.');
+          this.toast.showError('Operation failed.');
         }
       });
     }

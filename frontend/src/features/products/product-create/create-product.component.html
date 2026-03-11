@@ -21,7 +21,8 @@
       <div class="field">
         <label>Stock Quantity</label>
         <input type="number" formControlName="stockQuantity" placeholder="1">
-        <small class="error" *ngIf="productForm.get('stockQuantity')?.invalid && productForm.get('stockQuantity')?.touched">
+        <small class="error"
+          *ngIf="productForm.get('stockQuantity')?.invalid && productForm.get('stockQuantity')?.touched">
           Stock must be at least 1
         </small>
       </div>
@@ -42,8 +43,12 @@
       </div>
 
       <div class="media-section">
-        <label>Product Images (Max 4)</label>
-        
+        <label>Product Images (At least 1 required, Max 4)</label>
+
+        <small class="error" *ngIf="previewUrls.length === 0">
+          Please upload at least one image to proceed.
+        </small>
+
         <div class="media-grid">
           <div *ngFor="let url of previewUrls; let i = index" class="media-item">
             <img [src]="url" alt="Preview" class="thumbnail-preview">
@@ -51,13 +56,7 @@
           </div>
         </div>
 
-        <input type="file" 
-               accept="image/*" 
-               (change)="onFileSelected($event)" 
-               [disabled]="previewUrls.length >= maxMedia"
-               class="upload-input">
-        
-        <p *ngIf="previewUrls.length >= maxMedia" class="warning">Max images reached.</p>
+        <input type="file" (change)="onFileSelected($event)" [disabled]="previewUrls.length >= 4">
       </div>
 
       <button type="submit" [disabled]="productForm.invalid" class="submit-btn">
