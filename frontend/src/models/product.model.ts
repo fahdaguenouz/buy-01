@@ -4,6 +4,6 @@ export interface Product {
   description: string;
   price: number;
   sellerId: string;
-  imageUrls: string[]; // References to the Media Service
+  mediaIds: string[]; 
   createdAt?: Date;
 }

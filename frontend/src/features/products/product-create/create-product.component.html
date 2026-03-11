@@ -2,7 +2,7 @@
   <div class="form-card">
     <h2>🚀 List a New Product</h2>
     <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
-      
+
       <div class="form-grid">
         <div class="field">
           <label>Product Name</label>
@@ -13,6 +13,15 @@
           <label>Price ($)</label>
           <input type="number" formControlName="price" placeholder="0.00">
         </div>
+      </div>
+      <div class="field">
+        <label>Stock Quantity</label>
+        <input type="number" formControlName="stockQuantity" placeholder="How many items in stock">
+
+        <small class="error"
+          *ngIf="productForm.get('stockQuantity')?.invalid && productForm.get('stockQuantity')?.touched">
+          Stock quantity must be at least 1
+        </small>
       </div>
 
       <div class="field">
@@ -31,13 +40,40 @@
       </div>
 
       <div class="media-section">
-        <label>Product Media (Max 4 Image URLs)</label>
-        <div class="media-grid" formArrayName="media">
-          <div *ngFor="let control of media.controls; let i = index">
-            <input [formControlName]="i" placeholder="Image URL {{i + 1}}">
+        <label>Product Images (Max 4)</label>
+
+        <div class="media-grid">
+          <div *ngFor="let control of media.controls; let i = index" class="media-item">
+
+            <input type="file" accept="image/*" (change)="onFileSelected($event, i)" />
+
+            <div class="thumbnail-preview" *ngIf="previewUrls[i]">
+              <img [src]="previewUrls[i]" alt="Preview">
+            </div>
+
+            <button type="button" class="remove-btn" (click)="removeMedia(i)" *ngIf="media.length > 1">
+              Remove
+            </button>
+
           </div>
         </div>
+
+        <button type="button" class="add-media-btn" (click)="addMedia()" [disabled]="media.length >= 4">
+          + Add Media
+        </button>
+
       </div>
+      <small class="error" *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched">
+
+        <span *ngIf="productForm.get('name')?.errors?.['required']">
+          Product name is required
+        </span>
+
+        <span *ngIf="productForm.get('name')?.errors?.['minlength']">
+          Name must be at least 3 characters
+        </span>
+
+      </small>
 
       <button type="submit" [disabled]="productForm.invalid" class="submit-btn">
         Create Product

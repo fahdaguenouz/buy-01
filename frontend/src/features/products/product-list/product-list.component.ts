@@ -26,6 +26,8 @@ export class ProductListComponent implements OnInit {
     this.isLoading = true;
     this.productService.getAllProducts().subscribe({
       next: (data) => {
+        console.log(data);
+        
         this.products = data;
         this.isLoading = false;
       },

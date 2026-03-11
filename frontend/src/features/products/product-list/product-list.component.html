@@ -11,7 +11,7 @@
   <mat-card class="product-card" *ngFor="let product of products">
 
     <img mat-card-image
-      [src]="product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : '/images/product.jpeg'"
+      [src]="product.mediaIds && product.mediaIds.length > 0 ? product.mediaIds[0] : '/images/product.jpeg'"
       [alt]="product.name" class="product-img">
 
     <mat-card-content>

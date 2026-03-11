@@ -19,7 +19,7 @@ export class ProductService {
     return this.http.get<Product[]>(PRODUCT_API);
   }
 
-  createProduct(product: Partial<Product>): Observable<Product> {
-    return this.http.post<Product>(`${PRODUCT_API}/products`, product);
-  }
+  createProduct(product: any): Observable<Product> {
+  return this.http.post<Product>(`${PRODUCT_API}`, product);
+}
 }
