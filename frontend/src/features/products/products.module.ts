@@ -14,7 +14,8 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatSelectModule } from "@angular/material/select";
-
+import { FormsModule } from '@angular/forms';  // For ngModel
+import { MatTableModule } from '@angular/material/table';  // For mat-table, 
 @NgModule({
   declarations: [
     ProductListComponent,
@@ -26,6 +27,8 @@ import { MatSelectModule } from "@angular/material/select";
     CommonModule,
     ReactiveFormsModule, 
     MatCardModule,
+    FormsModule,
+    MatTableModule,
     RouterModule,
     MatButtonModule,
     MatFormFieldModule,
