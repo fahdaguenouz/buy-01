@@ -13,7 +13,7 @@
     <div class="gallery-section">
       <div class="main-image-container">
         <img 
-          [src]="product.mediaIds[selectedImageIndex] || 'assets/images/product-placeholder.jpg'" 
+          [src]="product.mediaIds[selectedImageIndex] || '/images/product.jpeg'" 
           class="main-image"
           [alt]="product.name"
           (error)="onImageError($event)">
@@ -63,7 +63,7 @@
 
       <div class="seller-card" *ngIf="seller">
         <div class="seller-avatar">
-          {{ seller.username?.charAt(0)?.toUpperCase() }}
+          {{ seller.username.charAt(0).toUpperCase() }}
         </div>
         <div class="seller-info">
           <span class="seller-label">Sold by</span>

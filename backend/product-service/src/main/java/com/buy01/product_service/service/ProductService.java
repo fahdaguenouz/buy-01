@@ -28,12 +28,15 @@ public class ProductService {
     public ProductResponse createProduct(ProductRequest request, String sellerId) {
 
         // 1. Sanitize the incoming media IDs so we ONLY store the filename
-        List<String> cleanMediaIds = new ArrayList<>();
-        if (request.mediaIds() != null) {
-            for (String mediaUrl : request.mediaIds()) {
-                cleanMediaIds.add(extractFilename(mediaUrl));
+       List<String> cleanMediaIds = new ArrayList<>();  // ADD THIS LINE
+    if (request.mediaIds() != null) {
+        for (String mediaUrl : request.mediaIds()) {
+            String filename = extractFilename(mediaUrl);
+            if (filename != null && !filename.trim().isEmpty()) {
+                cleanMediaIds.add(filename);
             }
         }
+    }
 
         Product product = Product.builder()
                 .name(request.name())
@@ -42,7 +45,7 @@ public class ProductService {
                 .stockQuantity(request.stockQuantity())
                 .category(request.category())
                 .sellerId(sellerId)
-                .mediaIds(cleanMediaIds) // Save only "abc.jpg" or "xyz.png"
+                .mediaIds(cleanMediaIds.isEmpty() ? null : cleanMediaIds) // Save only "abc.jpg" or "xyz.png"
                 .build();
 
         Product savedProduct = productRepository.save(product);
@@ -108,20 +111,25 @@ public class ProductService {
 
        
 
-        List<String> cleanMediaIds = new ArrayList<>();
-        for (String mediaUrl : request.mediaIds()) {
-            cleanMediaIds.add(extractFilename(mediaUrl));
+       List<String> cleanMediaIds = new ArrayList<>();
+if (request.mediaIds() != null) {
+    for (String mediaUrl : request.mediaIds()) {
+        String filename = extractFilename(mediaUrl);
+        if (filename != null && !filename.trim().isEmpty()) {
+            cleanMediaIds.add(filename);
         }
-        product.setMediaIds(cleanMediaIds);
+    }
+}
 
+        product.setMediaIds(cleanMediaIds.isEmpty() ? null : cleanMediaIds);
         productRepository.save(product);
     }
 
     private ProductResponse mapToResponse(Product product) {
-        List<String> mediaUrls = new ArrayList<>();
-        if (product.getMediaIds() != null) {
-            for (String mediaId : product.getMediaIds()) {
-                // 2. Defensive mapping: Check if old data already contains 'http'
+       List<String> mediaUrls = new ArrayList<>();
+    if (product.getMediaIds() != null) {
+        for (String mediaId : product.getMediaIds()) {
+            if (mediaId != null) {  // Null-safe
                 if (mediaId.startsWith("http")) {
                     mediaUrls.add(mediaId);
                 } else {
@@ -129,6 +137,7 @@ public class ProductService {
                 }
             }
         }
+    }
 
         return ProductResponse.builder()
                 .id(product.getId())
@@ -142,6 +151,7 @@ public class ProductService {
                 .createdAt(product.getCreatedAt())
                 .build();
     }
+    
 
     // Helper method to extract "abc.jpg" from
     // "http://localhost:8083/api/media/images/abc.jpg"

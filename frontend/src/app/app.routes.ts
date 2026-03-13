@@ -5,7 +5,7 @@ import { RegisterComponent } from '../features/auth/register/register.component'
 import { AuthGuard } from '../core/guards/auth.guard';
 import { ProductListComponent } from '../features/products/product-list/product-list.component';
 import { ProfileComponent } from '../features/profile/profile.component';
-import { AddProductComponent } from '../features/products/product-create/create-product.component';
+import { AddProductComponent } from '../features/products/product-create/crud-product.component';
 import { ProductDetailComponent } from '../features/products/product-detail/product-detail.component';
 import { SellerDashboardComponent } from '../features/products/seller-dashboard/seller-dashboard.component';
 

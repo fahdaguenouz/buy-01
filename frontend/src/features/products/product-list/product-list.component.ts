@@ -44,9 +44,9 @@ export class ProductListComponent implements OnInit {
 
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    img.src = 'assets/images/product-placeholder.jpg';
+    img.src = '/images/product.jpeg';
   }
-  
+
   loadProducts(): void {
     this.isLoading = true;
     this.productService.getAllProducts().subscribe({

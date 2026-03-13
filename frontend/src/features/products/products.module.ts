@@ -6,12 +6,14 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field"; 
 import { MatInputModule } from "@angular/material/input";
 import { ProductListComponent } from "./product-list/product-list.component";
-import { AddProductComponent } from "./product-create/create-product.component";
+import { AddProductComponent } from "./product-create/crud-product.component";
 import { ProductDetailComponent } from "./product-detail/product-detail.component";
 import { RouterModule } from "@angular/router";
 import { SellerDashboardComponent } from "./seller-dashboard/seller-dashboard.component";
 import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MatSelectModule } from "@angular/material/select";
 
 @NgModule({
   declarations: [
@@ -29,7 +31,9 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+     MatSelectModule,
+    MatProgressBarModule
   ],
   exports: [
     ProductListComponent,
