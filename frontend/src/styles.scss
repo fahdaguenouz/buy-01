@@ -317,3 +317,74 @@ body {
 .animate-slide-up {
   animation: slideUp 0.6s ease-out;
 }
+
+// Fix dialog backgrounds - solid white instead of glass
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: white !important;
+  background: white !important;
+}
+
+.mat-mdc-dialog-surface {
+  background: white !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+// Ensure dialog content is readable
+.mdc-dialog__content {
+  color: var(--deep-slate) !important;
+}
+
+// Fix for specific dialog panels
+.profile-dialog-panel,
+.delete-dialog-panel {
+  .mat-mdc-dialog-container {
+    background: white !important;
+    border-radius: 20px;
+  }
+  
+  .mat-mdc-dialog-surface {
+    background: white !important;
+  }
+}
+
+
+// Fix mat-select dropdown panel - solid white background
+.mat-mdc-select-panel {
+  background: white !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(100, 116, 139, 0.15) !important;
+}
+
+// Fix mat-option styling
+.mat-mdc-option {
+  background: white !important;
+  color: var(--deep-slate) !important;
+  min-height: 48px !important;
+  
+  &:hover:not(.mdc-list-item--disabled) {
+    background: rgba(198, 40, 40, 0.08) !important;
+  }
+  
+  &.mat-mdc-option-active,
+  &.mdc-list-item--selected {
+    background: rgba(198, 40, 40, 0.12) !important;
+    color: var(--cold-red-primary) !important;
+  }
+  
+  .mdc-list-item__primary-text {
+    color: var(--deep-slate) !important;
+    font-weight: 500 !important;
+  }
+}
+
+// Fix the select trigger text color
+.mat-mdc-select-value {
+  color: var(--deep-slate) !important;
+  font-weight: 500 !important;
+}
+
+// Fix select arrow icon
+.mat-mdc-select-arrow {
+  color: var(--slate-cool) !important;
+}

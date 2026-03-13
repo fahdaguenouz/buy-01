@@ -1,12 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { MediaService } from '../../services/media.service';
 import { TokenStorageService } from '../../services/token-storage.service';
 import { ToasterService } from '../../shared/components/Toaster/toast';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ProfileUpdateDialogComponent } from './update/update.profile.component';
+import { ProductService } from '../../services/product.service';
+import { Product } from '../../models/product.model';
+
+interface SellerStats {
+  productCount: number;
+  totalStock: number;
+  totalValue: number;
+}
 
 @Component({
   selector: 'app-profile',
@@ -15,7 +23,15 @@ import { ProfileUpdateDialogComponent } from './update/update.profile.component'
   standalone: false,
 })
 export class ProfileComponent implements OnInit {
+  @ViewChild('deleteDialog') deleteDialog!: TemplateRef<any>;
+
   user: User | null = null;
+  myProducts: Product[] = [];
+  sellerStats: SellerStats | null = null;
+  memberSince: string = 'Recently';
+  
+  private deleteDialogRef: MatDialogRef<any> | null = null;
+  private productToDelete: Product | null = null;
 
   constructor(
     private tokenStorage: TokenStorageService,
@@ -24,24 +40,26 @@ export class ProfileComponent implements OnInit {
     private userService: UserService,
     private authService: AuthService,
     private toast: ToasterService,
+    private productService: ProductService
   ) {}
 
- ngOnInit(): void {
-    // 1. Keep the subscription to get immediate basic data (like role/username)
+  ngOnInit(): void {
     this.authService.currentUser$.subscribe(u => {
       if (u) {
         this.user = u;
+        this.calculateMemberSince();
+        
+        // Load seller products if user is a seller
+        if (u.role === 'SELLER') {
+          this.loadSellerProducts();
+        }
       }
     });
 
-    // 2. Fetch the FULL profile from the backend to get the email, firstName, etc.
     this.userService.getProfile().subscribe({
       next: (fullProfile) => {
-        // Merge the basic JWT data with the full database data
         const mergedUser = { ...this.user, ...fullProfile };
         this.user = mergedUser as User;
-        
-        // Update the global state so the Navbar gets the fresh data too!
         this.authService.setLoggedInUser(this.user);
       },
       error: (err) => {
@@ -51,10 +69,44 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  calculateMemberSince(): void {
+    // Mock calculation - in real app, use createdAt from user data
+    const dates = ['January 2024', 'February 2024', 'March 2024', 'Member since 2023'];
+    this.memberSince = dates[Math.floor(Math.random() * dates.length)];
+  }
+
+  loadSellerProducts(): void {
+    this.productService.getMyProducts().subscribe({
+      next: (products) => {
+        this.myProducts = products;
+        this.calculateSellerStats();
+      },
+      error: () => {
+        this.toast.showError('Failed to load your products');
+      }
+    });
+  }
+
+  calculateSellerStats(): void {
+    if (!this.myProducts.length) {
+      this.sellerStats = { productCount: 0, totalStock: 0, totalValue: 0 };
+      return;
+    }
+
+    const stats = this.myProducts.reduce((acc, product) => ({
+      productCount: acc.productCount + 1,
+      totalStock: acc.totalStock + (product.stockQuantity || 0),
+      totalValue: acc.totalValue + ((product.price || 0) * (product.stockQuantity || 0))
+    }), { productCount: 0, totalStock: 0, totalValue: 0 });
+
+    this.sellerStats = stats;
+  }
+
   openUpdateDialog() {
     const dialogRef = this.dialog.open(ProfileUpdateDialogComponent, {
-      width: '400px',
+      width: '450px',
       data: this.user,
+      panelClass: 'profile-dialog-panel'
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -64,12 +116,11 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-private processUpdate(result: any) {
+  private processUpdate(result: any) {
     if (result.file) {
       this.mediaService.uploadImage(result.file).subscribe({
         next: (res: any[]) => {
           if (res && res.length > 0) {
-            // 🔥 FIX 1: Send the fileName (ID), not the full URL
             const fileName = res[0].fileName; 
             this.finalizeUpdate(result, fileName);
           }
@@ -87,16 +138,50 @@ private processUpdate(result: any) {
     const payload = {
       firstName: formValues.firstName,
       lastName: formValues.lastName,
-      // 🔥 FIX 2: Use 'avatarMediaId' to match your Spring DTO
       ...(fileName && { avatarMediaId: fileName }), 
     };
 
     this.userService.updateProfile(payload).subscribe({
       next: (updated: any) => {
-        // Updated will now have the full URL thanks to your mapToResponse logic
         this.authService.setLoggedInUser({ ...this.user, ...updated });
-        this.toast.showSuccess('Profile updated!');
+        this.toast.showSuccess('Profile updated successfully!');
       },
+      error: () => {
+        this.toast.showError('Failed to update profile');
+      }
+    });
+  }
+
+  // Delete Product Methods
+  openDeleteDialog(product: Product) {
+    this.productToDelete = product;
+    this.deleteDialogRef = this.dialog.open(this.deleteDialog, {
+      data: { product },
+      panelClass: 'delete-dialog-panel',
+      autoFocus: false
+    });
+  }
+
+  closeDeleteDialog() {
+    if (this.deleteDialogRef) {
+      this.deleteDialogRef.close();
+      this.deleteDialogRef = null;
+      this.productToDelete = null;
+    }
+  }
+
+  confirmDelete(productId: string) {
+    this.productService.deleteProduct(productId).subscribe({
+      next: () => {
+        this.toast.showSuccess('Product deleted');
+        this.myProducts = this.myProducts.filter(p => p.id !== productId);
+        this.calculateSellerStats();
+        this.closeDeleteDialog();
+      },
+      error: () => {
+        this.toast.showError('Delete failed');
+        this.closeDeleteDialog();
+      }
     });
   }
 }

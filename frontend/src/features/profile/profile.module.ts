@@ -13,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field'; // Fixes mat-
 
 import { ProfileComponent } from './profile.component';
 import { ProfileUpdateDialogComponent } from './update/update.profile.component';
+import { RouterLink, RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { ProfileUpdateDialogComponent } from './update/update.profile.component'
     MatIconModule,
     MatDialogModule,
     MatDividerModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    RouterModule,
   ],
   exports: [
     ProfileComponent
