@@ -14,7 +14,9 @@ export class ProductDetailComponent implements OnInit {
   product: Product | null = null;
   selectedImageIndex = 0;
   isLoading = true;
-    seller: User | null = null;
+  seller: User | null = null;
+  quantity = 1;
+
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService
@@ -27,7 +29,6 @@ export class ProductDetailComponent implements OnInit {
         next: (data) => {
           this.product = data;
           this.isLoading = false;
-          // Fetch the seller details using the sellerId
           this.fetchSellerInfo(data.sellerId);
         },
         error: () => (this.isLoading = false)
@@ -41,7 +42,37 @@ export class ProductDetailComponent implements OnInit {
       error: () => console.error("Could not fetch seller info")
     });
   }
-   changeImage(index: number) {
+
+  changeImage(index: number) {
     this.selectedImageIndex = index;
+  }
+
+  nextImage() {
+    if (this.product && this.product.mediaIds.length > 0) {
+      this.selectedImageIndex = (this.selectedImageIndex + 1) % this.product.mediaIds.length;
+    }
+  }
+
+  prevImage() {
+    if (this.product && this.product.mediaIds.length > 0) {
+      this.selectedImageIndex = (this.selectedImageIndex - 1 + this.product.mediaIds.length) % this.product.mediaIds.length;
+    }
+  }
+
+  incrementQty() {
+    if (this.product && this.quantity < this.product.stockQuantity) {
+      this.quantity++;
+    }
+  }
+
+  decrementQty() {
+    if (this.quantity > 1) {
+      this.quantity--;
+    }
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = 'assets/images/product-placeholder.jpg';
   }
 }

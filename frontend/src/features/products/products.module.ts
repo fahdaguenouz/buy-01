@@ -10,6 +10,8 @@ import { AddProductComponent } from "./product-create/create-product.component";
 import { ProductDetailComponent } from "./product-detail/product-detail.component";
 import { RouterModule } from "@angular/router";
 import { SellerDashboardComponent } from "./seller-dashboard/seller-dashboard.component";
+import { MatIconModule } from "@angular/material/icon";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 @NgModule({
   declarations: [
@@ -25,7 +27,9 @@ import { SellerDashboardComponent } from "./seller-dashboard/seller-dashboard.co
     RouterModule,
     MatButtonModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    MatIconModule,
+    MatProgressSpinnerModule
   ],
   exports: [
     ProductListComponent,

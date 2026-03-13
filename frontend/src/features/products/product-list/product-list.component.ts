@@ -15,48 +15,51 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private toast: ToasterService
+    private toast: ToasterService,
   ) {}
 
   filteredProducts: Product[] = [];
   categories: any[] = [];
   selectedCategory: string = 'All';
 
+  ngOnInit(): void {
+    // Use the method that handles the loading state
+    this.loadProducts();
 
- ngOnInit(): void {
-  // Use the method that handles the loading state
-  this.loadProducts(); 
-
-  // Load Categories
-  this.productService.getCategories().subscribe({
-    next: (data) => this.categories = data,
-    error: (err) => console.error("Could not load categories", err)
-  });
-}
+    // Load Categories
+    this.productService.getCategories().subscribe({
+      next: (data) => (this.categories = data),
+      error: (err) => console.error('Could not load categories', err),
+    });
+  }
 
   filterByCategory(categoryName: string): void {
     this.selectedCategory = categoryName;
     if (categoryName === 'All') {
       this.filteredProducts = this.products;
     } else {
-      this.filteredProducts = this.products.filter(p => p.category === categoryName);
+      this.filteredProducts = this.products.filter((p) => p.category === categoryName);
     }
   }
 
-
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = 'assets/images/product-placeholder.jpg';
+  }
+  
   loadProducts(): void {
-  this.isLoading = true;
-  this.productService.getAllProducts().subscribe({
-    next: (data) => {
-      this.products = data;
-      // Initialize with all products selected
-      this.filteredProducts = data; 
-      this.isLoading = false;
-    },
-    error: (err) => {
-      this.isLoading = false;
-      this.toast.showError('Failed to load products.');
-    }
-  });
-}
+    this.isLoading = true;
+    this.productService.getAllProducts().subscribe({
+      next: (data) => {
+        this.products = data;
+        // Initialize with all products selected
+        this.filteredProducts = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.toast.showError('Failed to load products.');
+      },
+    });
+  }
 }
