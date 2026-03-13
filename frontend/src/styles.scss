@@ -246,7 +246,38 @@ body {
     color: white !important;
   }
 }
+// Add to your existing styles.scss
 
+.info-snackbar {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  color: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3) !important;
+  
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.warning-snackbar {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+  color: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(217, 119, 6, 0.3) !important;
+  
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+// Enhanced bottom snackbar positioning
+.mat-mdc-snack-bar-container {
+  margin-bottom: 24px !important;
+  
+  &.mat-mdc-snack-bar-btm {
+    transform: translateY(-24px) !important;
+  }
+}
 // Responsive utilities
 @media (max-width: 640px) {
   .auth-page {

@@ -9,19 +9,37 @@ export class ToasterService {
 
   showSuccess(message: string): void {
     this.snackBar.open(message, 'Close', {
-      duration: 3000, // Disappears after 3 seconds
-      horizontalPosition: 'end', // Top right or bottom right
-      verticalPosition: 'top',
-      panelClass: ['success-snackbar'] // Custom CSS class for styling
+      duration: 3000,
+      horizontalPosition: 'center', // Centered horizontally
+      verticalPosition: 'bottom',   // Bottom of screen
+      panelClass: ['success-snackbar']
     });
   }
 
   showError(message: string): void {
     this.snackBar.open(message, 'Close', {
-      duration: 4000, // Errors stay a bit longer
-      horizontalPosition: 'end',
-      verticalPosition: 'top',
-      panelClass: ['error-snackbar'] // Custom CSS class for styling
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['error-snackbar']
+    });
+  }
+
+  showInfo(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['info-snackbar']
+    });
+  }
+
+  showWarning(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['warning-snackbar']
     });
   }
 }
