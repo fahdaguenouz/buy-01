@@ -15,6 +15,7 @@ export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   errorMessage = '';
   hidePassword = true;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -33,6 +34,7 @@ export class LoginComponent implements OnInit {
 
 // Inside your onSubmit() method:
 onSubmit(): void {
+  this.isLoading = true;
   if (this.loginForm.valid) {
     this.authService.login(this.loginForm.value).subscribe({
       next: (data) => {

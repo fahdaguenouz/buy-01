@@ -15,6 +15,7 @@ export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   errorMessage = '';
   roles = [UserRole.CLIENT, UserRole.SELLER]; // Loaded from our model
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -36,6 +37,7 @@ export class RegisterComponent implements OnInit {
   }
 
   onRegister() {
+    this.isLoading = true;
     if (this.registerForm.valid) {
       this.authService.register(this.registerForm.value).subscribe({
         next: () => {
