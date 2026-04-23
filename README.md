@@ -1,6 +1,3 @@
- Here's a polished global README for your Buy-01 project:
-
----
 
 # 🛒 Buy-01 — Full-Stack E-Commerce Platform
 
