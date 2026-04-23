@@ -39,3 +39,22 @@ frontend/src/app/
 │
 ├── app-routing.module.ts   # Main route definitions
 └── app.component.ts        # Root component
+
+
+
+| Event            | Producer        | Consumer(s)                                       | Why It Matters                                                |
+| ---------------- | --------------- | ------------------------------------------------- | ------------------------------------------------------------- |
+| `ProductCreated` | Product Service | Audit Service, Search Index, Notification Service | Core business event; enables audit trail and search indexing  |
+| `ProductUpdated` | Product Service | Audit Service, Cache Invalidation                 | Tracks changes for compliance; clears stale cache             |
+| `ImageUploaded`  | Media Service   | Thumbnail Generator, CDN Warmer, Audit            | Triggers async processing (resizing, CDN push)                |
+| `UserRegistered` | User Service    | Welcome Email, Analytics                          | Onboarding flow; business metrics                             |
+| `ProductDeleted` | Product Service | Media Service, Audit Service                      | **You have this** — cleanup + audit                           |
+
+
+| Criterion                          | Your Current State      | What's Needed                                                           |
+| ---------------------------------- | ----------------------- | ----------------------------------------------------------------------- |
+| Kafka used for async communication | ✅ Barely (1 event)      | Add 2-3 more core events                                                |
+| Audit trail                        | ❌ Missing               | Add `ProductCreated`, `ProductUpdated`, `ProductDeleted` to audit topic |
+| Cache invalidation                 | ❌ Missing               | Add `ProductUpdated` consumer to clear Redis/cache                      |
+| Thumbnail generation               | ❌ Missing               | Add `ImageUploaded` consumer                                            |
+| Event schema design                | ❌ Basic (just filename) | Add metadata (eventId, timestamp, correlationId, source)                |
