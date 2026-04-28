@@ -45,7 +45,7 @@ public class ProductService {
                 .stockQuantity(request.stockQuantity())
                 .category(request.category())
                 .sellerId(sellerId)
-                .mediaIds(cleanMediaIds.isEmpty() ? null : cleanMediaIds) // Save only "abc.jpg" or "xyz.png"
+                .mediaIds(cleanMediaIds) 
                 .build();
 
         Product savedProduct = productRepository.save(product);

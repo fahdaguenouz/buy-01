@@ -26,7 +26,7 @@ export class AddProductComponent implements OnInit {
   uploadProgress = 0;
   isSubmitMode = false;
   files: File[] = [];
-  previewUrls: string[] = []; 
+  previewUrls: string[] = [];
   existingMedia: string[] = [];
   categories: any[] = [];
   selectedPreviewImage: string | null = null;
@@ -38,7 +38,7 @@ export class AddProductComponent implements OnInit {
     private mediaService: MediaService,
     private router: Router,
     private route: ActivatedRoute,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -60,7 +60,7 @@ export class AddProductComponent implements OnInit {
   loadCategories(): void {
     this.productService.getCategories().subscribe({
       next: (data) => (this.categories = data),
-      error: () => this.toast.showError('Failed to load categories')
+      error: () => this.toast.showError('Failed to load categories'),
     });
   }
 
@@ -77,7 +77,7 @@ export class AddProductComponent implements OnInit {
         error: () => {
           this.toast.showError('Failed to load product');
           this.router.navigate(['/seller-dashboard']);
-        }
+        },
       });
     }
   }
@@ -114,7 +114,7 @@ export class AddProductComponent implements OnInit {
   }
 
   handleFiles(newFiles: File[]): void {
-    const validFiles = newFiles.filter(file => {
+    const validFiles = newFiles.filter((file) => {
       // Validate file type
       if (!file.type.match(/image\/(jpeg|jpg|png)/)) {
         this.toast.showError(`${file.name} is not a valid image file`);
@@ -132,10 +132,12 @@ export class AddProductComponent implements OnInit {
     const filesToAdd = validFiles.slice(0, remainingSlots);
 
     if (validFiles.length > remainingSlots) {
-      this.toast.showWarning(`Only ${remainingSlots} more image${remainingSlots !== 1 ? 's' : ''} can be added`);
+      this.toast.showWarning(
+        `Only ${remainingSlots} more image${remainingSlots !== 1 ? 's' : ''} can be added`,
+      );
     }
 
-    filesToAdd.forEach(file => {
+    filesToAdd.forEach((file) => {
       this.files.push(file);
       const reader = new FileReader();
       reader.onload = () => {
@@ -160,7 +162,7 @@ export class AddProductComponent implements OnInit {
     this.selectedPreviewImage = url;
     this.dialog.open(this.imagePreviewDialog, {
       maxWidth: '90vw',
-      maxHeight: '90vh'
+      maxHeight: '90vh',
     });
   }
 
@@ -188,13 +190,13 @@ export class AddProductComponent implements OnInit {
     // Upload new files first
     if (this.files.length > 0) {
       this.uploadProgress = 0;
-      const uploadObservables = this.files.map(file => 
-        this.mediaService.uploadImage(file)
-      );
+      const uploadObservables = this.files.map((file) => this.mediaService.uploadImage(file));
 
       forkJoin(uploadObservables).subscribe({
         next: (responses: any[]) => {
-          const newMediaIds = responses.map((res: any) => res.fileName || res.id);
+          console.log("UPLOAD RESPONSES:", responses);
+          const newMediaIds = responses.flatMap((res: any[]) => res.map((file) => file.fileName));
+          console.log("MEDIA IDS:", newMediaIds);
           const finalMediaIds = [...this.existingMedia, ...newMediaIds];
           this.saveProduct(finalMediaIds);
         },
@@ -202,7 +204,7 @@ export class AddProductComponent implements OnInit {
           console.error(err);
           this.isSubmitting = false;
           this.toast.showError('Failed to upload images');
-        }
+        },
       });
     } else {
       // No new files, just save with existing
@@ -211,13 +213,13 @@ export class AddProductComponent implements OnInit {
   }
 
   saveProduct(mediaIds: string[]): void {
-    const payload = { 
-      ...this.productForm.value, 
-      mediaIds: mediaIds 
+    const payload = {
+      ...this.productForm.value,
+      mediaIds: mediaIds,
     };
 
-    const action$ = this.isEditMode 
-      ? this.productService.updateProduct(this.productId!, payload) 
+    const action$ = this.isEditMode
+      ? this.productService.updateProduct(this.productId!, payload)
       : this.productService.createProduct(payload);
 
     action$.subscribe({
@@ -229,7 +231,7 @@ export class AddProductComponent implements OnInit {
         console.error(err);
         this.isSubmitting = false;
         this.toast.showError(err.error?.message || 'Operation failed. Please try again.');
-      }
+      },
     });
   }
 }
